@@ -1,0 +1,72 @@
+{
+  "type": "about_me",
+  "title": "Mark Manoti Ndege — Full Profile",
+  "content": {
+    "name": "Mark Manoti Ndege",
+    "handle": "N3stah",
+    "location": "Nairobi, Kenya",
+    "education": "BSc Computer Science (expected December 2026)",
+    "current_status": ["Computer Science Student", "Freelance Software Developer", "Product Builder", "Startup Enthusiast"],
+    "summary": "Software engineer and builder focused on backend systems, full-stack applications, AI-powered products, and startup development. Combines formal CS education with self-directed learning through real-world projects, hackathons, and open-source work. Passionate about building scalable solutions and contributing to Africa's tech ecosystem.",
+    "skills": {
+      "languages": ["Python", "Java", "C", "JavaScript", "HTML", "SQL"],
+      "frontend": ["React", "Next.js", "Responsive Web Design"],
+      "backend": ["FastAPI", "Node.js", "REST APIs", "Authentication Systems", "Database Design"],
+      "databases": ["PostgreSQL", "Supabase"],
+      "devops": ["Docker", "Nginx", "Linux", "Containerization", "Deployment"],
+      "ai": ["LLM Integration", "AI Application Development", "Prompt Engineering", "Agentic Systems"],
+      "cybersecurity": ["Networking Fundamentals", "Cisco Packet Tracer", "Secure Development"],
+      "blockchain": ["Blockchain Fundamentals", "Web3", "Decentralized Systems"],
+      "tools": ["Git", "GitHub", "System Design", "Software Architecture", "Agile"]
+    },
+    "preferred_stack": {
+      "frontend": "Next.js + React",
+      "backend": "FastAPI / Node.js",
+      "database": "PostgreSQL / Supabase",
+      "infra": "Docker + Linux + Nginx",
+      "deployment": "Vercel / Supabase"
+    },
+    "projects": [
+      {
+        "name": "SmartShamba",
+        "description": "AI-powered agricultural technology platform empowering Kenyan farmers through intelligent software solutions and digital tools.",
+        "status": "active",
+        "flagship": true
+      },
+      {
+        "name": "Personal Tech Ecosystem",
+        "description": "Centralized personal platform for projects, productivity, learning, professional growth, and digital presence. Powered by AETSH-69.",
+        "status": "in development",
+        "url": "aetsh69.com"
+      },
+      {
+        "name": "AETSH-69 Backend",
+        "description": "Production-oriented backend infrastructure with scalable APIs and deployment management.",
+        "status": "active"
+      }
+    ],
+    "hackathons": [
+      {"name": "KITI Project Hackathon II", "organizer": "University of Nairobi / C4D Lab", "date": "April 2026", "result": "Participant & Award Recipient"},
+      {"name": "Build54 Hackathon", "organizer": "Africa's Talking"},
+      {"name": "Band of Agents Hackathon", "organizer": "AMD × LabLab.ai"}
+    ],
+    "certifications": [
+      {"name": "KITI Bootcamp II", "issuer": "University of Nairobi / C4D Lab", "date": "April 2026", "topics": ["AI", "Cybersecurity", "Blockchain", "Big Data", "IoT"]},
+      {"name": "Getting Started with Cisco Packet Tracer", "issuer": "Cisco Networking Academy", "date": "March 2026"}
+    ],
+    "interests": {
+      "technical": ["Artificial Intelligence", "Web3 & Blockchain", "SaaS Products", "Cloud Computing", "Cybersecurity", "AgriTech", "FinTech"],
+      "personal": ["Photography", "Mobile Gaming (CODM)", "Cooking", "Travelling"]
+    },
+    "career_goals": {
+      "short_term": ["Full-Stack or AI Engineer roles", "Production-grade software systems", "AI-powered product development"],
+      "long_term": ["Technical leader and technology entrepreneur", "AI-powered SaaS products", "Solutions addressing real-world challenges across Africa"]
+    },
+    "social": {
+      "github": "https://github.com/N3stah",
+      "instagram": "https://instagram.com/dark_ice69",
+      "facebook": "https://facebook.com/mark.yg.50",
+      "linkedin": "https://linkedin.com/in/mark-manoti-ndege"
+    }
+  }
+}

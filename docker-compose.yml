@@ -1,0 +1,141 @@
+version: "3.9"
+
+networks:
+  ecosystem-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_uploads:
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ecosystem-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ecosystem
+      POSTGRES_USER: ecosystem
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM: ${SMTP_FROM}
+      FRONTEND_URL: ${FRONTEND_URL}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    ports:
+      - "5433:5432"
+    networks:
+      - ecosystem-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecosystem -d ecosystem"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecosystem-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - ecosystem-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: ecosystem-api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://ecosystem:${DB_PASSWORD:-changeme}@postgres:5432/ecosystem
+      - REDIS_URL=redis://redis:6379/0
+      - AI_PROVIDER=${AI_PROVIDER:-nvidia}
+      - NVIDIA_MODEL_PAIRS=${NVIDIA_MODEL_PAIRS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - media_uploads:/app/uploads
+    ports:
+      - "8000:8000"
+    networks:
+      - ecosystem-net
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: ecosystem-worker
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://ecosystem:${DB_PASSWORD:-changeme}@postgres:5432/ecosystem
+      - REDIS_URL=redis://redis:6379/0
+      - AI_PROVIDER=${AI_PROVIDER:-nvidia}
+      - NVIDIA_MODEL_PAIRS=${NVIDIA_MODEL_PAIRS}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./backend:/app
+    networks:
+      - ecosystem-net
+    command: celery -A app.celery worker --loglevel=info
+
+  beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: ecosystem-beat
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://ecosystem:${DB_PASSWORD:-changeme}@postgres:5432/ecosystem
+      - REDIS_URL=redis://redis:6379/0
+      - AI_PROVIDER=${AI_PROVIDER:-nvidia}
+      - NVIDIA_MODEL_PAIRS=${NVIDIA_MODEL_PAIRS}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./backend:/app
+    networks:
+      - ecosystem-net
+    command: celery -A app.celery beat --loglevel=info
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: ecosystem-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infrastructure/nginx/sites:/etc/nginx/conf.d:ro
+      - ./frontend/dist:/usr/share/nginx/html:ro
+    depends_on:
+      - api
+    networks:
+      - ecosystem-net
