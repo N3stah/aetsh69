@@ -1,10 +1,11 @@
-import uuid, base64, logging, requests
+import uuid, base64, logging, json, asyncio
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 import jwt
+import requests
 
 from app.database import get_db
 from app.config import settings
@@ -31,8 +32,6 @@ def get_mpesa_base_url() -> str:
 
 def get_mpesa_token() -> str:
     url = f"{get_mpesa_base_url()}/oauth/v1/generate?grant_type=client_credentials"
-    # Safaricom OAuth is notorious for failing if there is ANY hidden whitespace. 
-    # We .strip() the keys to remove any \r or spaces copied from the portal.
     key = settings.MPESA_CONSUMER_KEY.strip()
     secret = settings.MPESA_CONSUMER_SECRET.strip()
     credentials = base64.b64encode(f"{key}:{secret}".encode()).decode()
@@ -48,6 +47,11 @@ def get_mpesa_password() -> tuple[str, str]:
     raw = settings.MPESA_SHORTCODE + settings.MPESA_PASSKEY + timestamp
     password = base64.b64encode(raw.encode()).decode()
     return password, timestamp
+
+def _send_stk_push(payload: dict, headers: dict) -> requests.Response:
+    """Synchronous requests call to be run in a thread."""
+    url = f"{get_mpesa_base_url()}/mpesa/stkpush/v1/processrequest"
+    return requests.post(url, json=payload, headers=headers, timeout=15)
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
 
@@ -95,8 +99,9 @@ async def mpesa_stk_push(data: StkPushRequest, request: Request, db: AsyncSessio
             "TransactionDesc": f"AETSH-69 {data.tier.capitalize()} Membership"
         }
         headers = {"Authorization": f"Bearer {token}"}
-        url = f"{get_mpesa_base_url()}/mpesa/stkpush/v1/processrequest"
-        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        
+        # Run blocking request in a thread to avoid freezing the event loop
+        resp = await asyncio.to_thread(_send_stk_push, payload, headers)
         resp.raise_for_status()
         result = resp.json()
 
@@ -127,10 +132,10 @@ async def mpesa_stk_push(data: StkPushRequest, request: Request, db: AsyncSessio
         }
 
     except requests.RequestException as e:
-        logger.error("M-Pesa STK Push failed: %s | Response: %s", e, resp.text)
+        logger.error("M-Pesa STK Push failed: %s", e)
         raise HTTPException(status_code=502, detail="Could not reach M-Pesa. Try again.")
 
-@router.post("/mpesa/callback")
+@router.post("/stk-callback")
 async def mpesa_callback(request: Request, db: AsyncSession = Depends(get_db)):
     body = await request.json()
     logger.info("M-Pesa callback received: %s", body)
@@ -180,6 +185,8 @@ async def mpesa_callback(request: Request, db: AsyncSession = Depends(get_db)):
 
     except Exception as e:
         logger.error("M-Pesa callback processing error: %s", e)
+        # Return 500 so Safaricom retries the callback
+        raise HTTPException(status_code=500, detail="Internal processing error")
 
     return {"ResultCode": 0, "ResultDesc": "Accepted"}
 
@@ -212,8 +219,8 @@ async def mpesa_donate(data: DonationRequest, db: AsyncSession = Depends(get_db)
             "TransactionDesc": f"Donation from {data.name}"
         }
         headers = {"Authorization": f"Bearer {token}"}
-        url = f"{get_mpesa_base_url()}/mpesa/stkpush/v1/processrequest"
-        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        
+        resp = await asyncio.to_thread(_send_stk_push, payload, headers)
         resp.raise_for_status()
         result = resp.json()
 
@@ -225,13 +232,13 @@ async def mpesa_donate(data: DonationRequest, db: AsyncSession = Depends(get_db)
             INSERT INTO payments (id, user_id, amount_kes, provider, status,
                 merchant_request_id, checkout_request_id, metadata)
             VALUES (:id, '00000000-0000-0000-0000-000000000000', :amount, 'mpesa', 'pending',
-                :merchant_req, :checkout_req, :meta)
+                :merchant_req, :checkout_req, CAST(:meta AS jsonb))
         """), {
             "id": payment_id,
             "amount": data.amount,
             "merchant_req": result.get("MerchantRequestID"),
             "checkout_req": result.get("CheckoutRequestID"),
-            "meta": f'{{"donor_name": "{data.name}"}}',
+            "meta": json.dumps({"donor_name": data.name}),
         })
         await db.commit()
 

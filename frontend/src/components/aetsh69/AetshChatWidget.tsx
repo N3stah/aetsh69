@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Mic, Volume2, VolumeX, Square } from 'lucide-react';
 import { aetsh69Service, type ChatMessage } from '../../services/aetsh69';
 
@@ -66,39 +66,30 @@ export default function AetshChatWidget() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [interimText, setInterimText] = useState('');
   const [voiceOutputEnabled, setVoiceOutputEnabled] = useState(false);
-  const [voiceMode, setVoiceMode] = useState(false); // continuous voice-to-voice mode
+  const [voiceMode, setVoiceMode] = useState(false);
   
-  // Keep refs in sync with state for use inside callbacks
-  useEffect(() => { voiceModeRef.current = voiceMode; }, [voiceMode]);
-  useEffect(() => { voiceOutputRef.current = voiceOutputEnabled; }, [voiceOutputEnabled]);
-
-  const scrollRef = useRef<HTMLDivElement>(null);
   const voiceModeRef = useRef(false);
   const voiceOutputRef = useRef(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finalTranscriptRef = useRef('');
   const shouldRestartRef = useRef(false);
+  const isSendingRef = useRef(false);
+
+  useEffect(() => { voiceModeRef.current = voiceMode; }, [voiceMode]);
+  useEffect(() => { voiceOutputRef.current = voiceOutputEnabled; }, [voiceOutputEnabled]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, open, interimText]);
-
-  // Load speech synthesis voices
-  useEffect(() => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-    }
-    return () => { stopSpeaking(); stopListening(); };
-  }, []);
 
   const stopSpeaking = () => {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     setIsSpeaking(false);
   };
 
-  const speakText = useCallback((text: string, onDone?: () => void) => {
+  const speakText = (text: string, onDone?: () => void) => {
     if (!('speechSynthesis' in window) || (!voiceOutputRef.current && !voiceModeRef.current)) {
       onDone?.();
       return;
@@ -129,21 +120,23 @@ export default function AetshChatWidget() {
       window.speechSynthesis.speak(utt);
     };
     speakNext();
-  }, [voiceOutputEnabled, voiceMode]);
+  };
 
-  const stopListening = useCallback(() => {
+  const stopListening = () => {
     shouldRestartRef.current = false;
+    isSendingRef.current = true;
     if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     recognitionRef.current?.stop();
     recognitionRef.current = null;
     setIsListening(false);
     setInterimText('');
     finalTranscriptRef.current = '';
-  }, []);
+  };
 
-  const sendMessage = useCallback(async (text?: string, fromVoice = false) => {
+  const sendMessage = async (text?: string, fromVoice = false, restartCallback?: () => void) => {
     const msg = (text ?? input).trim();
     if (!msg || loading) return;
+
     setMessages(prev => [...prev, { role: 'user', content: msg }]);
     setInput('');
     setInterimText('');
@@ -156,11 +149,10 @@ export default function AetshChatWidget() {
       setConversationId(res.conversation_id);
       setMessages(prev => [...prev, { role: 'assistant', content: res.response }]);
 
-      if (fromVoice && (voiceOutputEnabled || voiceMode)) {
+      if (fromVoice && (voiceOutputRef.current || voiceModeRef.current)) {
         speakText(res.response, () => {
-          // In voice mode, restart listening after AI finishes speaking
-          if (voiceModeRef.current && shouldRestartRef.current !== false) {
-            setTimeout(() => startListening(true), 300);
+          if (voiceModeRef.current) {
+            setTimeout(() => restartCallback?.(), 300);
           }
         });
       }
@@ -169,15 +161,16 @@ export default function AetshChatWidget() {
     } finally {
       setLoading(false);
     }
-  }, [input, loading, conversationId, voiceOutputEnabled, voiceMode, speakText]);
+  };
 
-  const startListening = useCallback((fromVoice = false) => {
+  const startListening = (fromVoice = false) => {
     if (!SpeechRecognitionClass) return;
     stopSpeaking();
+    isSendingRef.current = false;
 
     const recognition = new SpeechRecognitionClass();
     recognitionRef.current = recognition;
-    recognition.continuous = true; // KEY FIX: keep mic open while speaking
+    recognition.continuous = true; 
     recognition.interimResults = true;
     recognition.lang = 'en-US';
     finalTranscriptRef.current = '';
@@ -200,23 +193,21 @@ export default function AetshChatWidget() {
       setInput(final);
       setInterimText(interim);
 
-      // Reset silence timer — 2.5s after last speech detected
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = setTimeout(() => {
         const toSend = (final + interim).trim();
         if (toSend) {
+          isSendingRef.current = true;
           recognition.stop();
-          sendMessage(toSend, fromVoice);
+          sendMessage(toSend, fromVoice, () => startListening(true));
         }
-      }, 2500); // 2.5 seconds of silence before auto-send
+      }, 2500); 
     };
 
     recognition.onerror = (e: Event) => {
       const err = e as ErrorEvent;
-      // Ignore no-speech errors in voice mode — just restart
       if ((err as unknown as { error: string }).error === 'no-speech' && fromVoice) {
         recognition.stop();
-        setTimeout(() => startListening(true), 500);
         return;
       }
       stopListening();
@@ -224,7 +215,14 @@ export default function AetshChatWidget() {
 
     recognition.onend = () => {
       setIsListening(false);
-      // Don't set interimText to empty here — it gets cleared on send
+      if (shouldRestartRef.current && !isSendingRef.current) {
+        try {
+          recognition.start();
+          setIsListening(true);
+        } catch (e) {
+          console.error("Failed to restart recognition", e);
+        }
+      }
     };
 
     try {
@@ -233,14 +231,25 @@ export default function AetshChatWidget() {
     } catch {
       setIsListening(false);
     }
-  }, [sendMessage, stopListening]);
+  };
+
+  // Load speech synthesis voices & cleanup on unmount
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    }
+    return () => {
+      stopSpeaking();
+      stopListening();
+    };
+  }, []);
 
   const handleMicClick = () => {
     if (isListening) {
       stopListening();
-      // If there's accumulated text, send it
       const toSend = (finalTranscriptRef.current + interimText).trim();
-      if (toSend) sendMessage(toSend, voiceMode);
+      if (toSend) sendMessage(toSend, voiceMode, () => startListening(true));
     } else {
       startListening(voiceMode);
     }
@@ -251,7 +260,6 @@ export default function AetshChatWidget() {
     setVoiceMode(newMode);
     voiceModeRef.current = newMode;
     if (newMode) {
-      // Auto-start listening when voice mode is enabled
       setVoiceOutputEnabled(true);
       voiceOutputRef.current = true;
       setTimeout(() => startListening(true), 300);
@@ -282,7 +290,7 @@ export default function AetshChatWidget() {
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-8rem)] bg-canvas-raised border border-line-strong rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden">
+        <div className="fixed bottom-24 right-6 z-50 w-90 max-w-[calc(100vw-2rem)] h-130 max-h-[calc(100vh-8rem)] bg-canvas-raised border border-line-strong rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden">
 
           {/* Header */}
           <div className="px-4 py-3 border-b border-line flex items-center gap-3">

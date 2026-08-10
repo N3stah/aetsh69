@@ -2,10 +2,12 @@ import { Routes, Route } from 'react-router-dom'
 const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/auth/ResetPasswordPage"));
 import { lazy, Suspense } from 'react'
+import { motion } from 'framer-motion'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
+import IntroLoader from './components/layout/IntroLoader'
 import WhatsAppButton from './components/layout/WhatsAppButton'
 
 // Eagerly loaded — critical path
@@ -47,49 +49,58 @@ function PageLoader() {
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#161614', color: '#F2EFE9' }}>
-      <Header />
-      <main className="flex-1">
-        <ErrorBoundary>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/portfolio" element={<PortfolioPage />} />
-            <Route path="/portfolio/:slug" element={<ProjectDetailPage />} />
-            <Route path="/blog" element={<BlogPage />} />
-            <Route path="/blog/:slug" element={<BlogPostDetailPage />} />
-            <Route path="/services" element={<ServicesPage />} />
-            <Route path="/shop" element={<ShopPage />} />
-            <Route path="/hobbies" element={<HobbiesPage />} />
-            <Route path="/photography" element={<PhotographyPage />} />
-            <Route path="/cooking" element={<CookingPage />} />
-            <Route path="/arcade" element={<ArcadePage />} />
-            <Route path="/membership" element={<MembershipPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/upgrade" element={<ProtectedRoute><UpgradePage /></ProtectedRoute>} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
-          </Routes>
+    <>
+      <IntroLoader />
+      <motion.div 
+        className="min-h-screen flex flex-col" 
+        style={{ backgroundColor: '#161614', color: '#F2EFE9' }}
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <Header />
+        <main className="flex-1">
+          <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/portfolio" element={<PortfolioPage/>} />
+              <Route path="/portfolio/:slug" element={<ProjectDetailPage />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:slug" element={<BlogPostDetailPage />} />
+              <Route path="/services" element={<ServicesPage />} />
+              <Route path="/shop" element={<ShopPage />} />
+              <Route path="/hobbies" element={<HobbiesPage />}/>
+              <Route path="/photography" element={<PhotographyPage />} />
+              <Route path="/cooking" element={<CookingPage />}/>
+              <Route path="/arcade" element={<ArcadePage />} />
+              <Route path="/membership" element={<MembershipPage />} />
+              <Route path="/contact" element={<ContactPage />}/>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              <Route path="/upgrade" element={<ProtectedRoute><UpgradePage /></ProtectedRoute>} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
+            </Routes>
+          </Suspense>
+          </ErrorBoundary>
+        </main>
+        <Footer />
+        <Suspense fallback={null}>
+          <AetshChatWidget />
         </Suspense>
-        </ErrorBoundary>
-      </main>
-      <WhatsAppButton />
-      <Footer />
-      <Suspense fallback={null}>
-        <AetshChatWidget />
-      </Suspense>
-      <Suspense fallback={null}>
-        <DonationWidget />
-      </Suspense>
-      <Suspense fallback={null}>
-        <CartDrawer />
-      </Suspense>
-    </div>
+        <Suspense fallback={null}>
+          <DonationWidget />
+        </Suspense>
+        <Suspense fallback={null}>
+          <CartDrawer />
+        </Suspense>
+        <WhatsAppButton />
+      </motion.div>
+    </>
   )
 }
