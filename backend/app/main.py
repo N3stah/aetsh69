@@ -1,7 +1,10 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import logging
 
 from app.config import settings
@@ -51,7 +54,22 @@ app = FastAPI(
     redirect_slashes=False,
 )
 
-import os
+# CORS Configuration
+origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    settings.FRONTEND_URL, # Pulls from env var (e.g., https://aetsh69.vercel.app)
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(RateLimitMiddleware, calls=100, period=60)
@@ -59,7 +77,6 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Mount uploads directory for static serving
 os.makedirs("uploads", exist_ok=True)
-from fastapi.staticfiles import StaticFiles
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.include_router(health_router,   prefix="/api/health",      tags=["Health"])
