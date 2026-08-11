@@ -1,27 +1,31 @@
-import os
-import uuid
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.staticfiles import StaticFiles
+from app.utils.storage import upload_file_to_cloudinary
+import logging
 
-router = APIRouter(tags=["Media"])
+router = APIRouter()
+logger = logging.getLogger(__name__)
 
-# Ensure upload directory exists
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-@router.post("/api/media/upload")
-async def upload_file(file: UploadFile = File(...)):
-    if not file.content_type or not file.content_type.startswith("image/"):
+@router.post("/upload")
+async def upload_media(file: UploadFile = File(...)):
+    """
+    Upload an image/file to Cloudinary cloud storage.
+    Returns the public URL of the uploaded file.
+    """
+    if not file.content_type or not file.content_type.startswith('image/'):
         raise HTTPException(status_code=400, detail="Only image files are allowed.")
-    
-    # Generate safe filename
-    ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
-    filename = f"{uuid.uuid4().hex}.{ext}"
-    filepath = os.path.join(UPLOAD_DIR, filename)
-    
-    # Save file
-    content = await file.read()
-    with open(filepath, "wb") as f:
-        f.write(content)
-        
-    return {"url": f"/uploads/{filename}", "filename": filename}
+
+    # Limit file size to 10MB
+    contents = await file.read()
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File size exceeds 10MB limit.")
+
+    try:
+        public_url = upload_file_to_cloudinary(
+            file_bytes=contents,
+            file_name=file.filename or "upload.jpg",
+            content_type=file.content_type
+        )
+        return {"url": public_url, "filename": file.filename}
+    except Exception as e:
+        logger.error(f"Media upload failed: {e}")
+        raise HTTPException(status_code=500, detail="Could not upload file to cloud storage.")

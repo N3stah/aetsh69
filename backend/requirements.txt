@@ -100,3 +100,5 @@ flake8==7.1.1
 mypy==1.11.2
 pre-commit==3.8.0
 openai
+python-multipart==0.0.9
+cloudinary==1.41.0
