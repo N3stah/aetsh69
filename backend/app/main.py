@@ -1,8 +1,9 @@
 import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import logging
@@ -34,7 +35,6 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("AETSH-69 Ecosystem starting...")
-    # Ensure upload directory exists
     UPLOAD_DIR = "uploads/avatars"
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     async with engine.begin() as conn:
@@ -54,12 +54,24 @@ app = FastAPI(
     redirect_slashes=False,
 )
 
-# CORS Configuration
+# --- SECURITY MIDDLEWARES ---
+
+# 1. Trusted Host Middleware (Prevents Host header spoofing)
+allowed_hosts = ["localhost", "127.0.0.1", "aetsh69-backend.onrender.com", ".vercel.app"]
+if settings.is_production:
+    allowed_hosts.append("aetsh69.duckdns.org") # Add this later when DuckDNS is setup
+
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=allowed_hosts
+)
+
+# 2. CORS Configuration
 origins = [
     "http://localhost:5173",
     "http://localhost:3000",
     "http://127.0.0.1:5173",
-    settings.FRONTEND_URL, # Pulls from env var (e.g., https://aetsh69.vercel.app)
+    settings.FRONTEND_URL,
 ]
 
 app.add_middleware(
@@ -70,10 +82,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 3. Security Headers (Includes HSTS, XSS Protection, Content-Type Options)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(RateLimitMiddleware, calls=100, period=60)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# 4. Request Size Limiting Middleware (Prevents DoS via large payloads)
+@app.middleware("http")
+async def limit_request_size(request: Request, call_next):
+    if request.method in ["POST", "PUT", "PATCH"]:
+        content_length = request.headers.get("content-length")
+        if content_length and int(content_length) > 15 * 1024 * 1024:  # 15 MB limit
+            raise HTTPException(status_code=413, detail="Request body too large. Maximum size is 15MB.")
+    return await call_next(request)
 
 # Mount uploads directory for static serving
 os.makedirs("uploads", exist_ok=True)
