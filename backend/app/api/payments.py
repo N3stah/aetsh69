@@ -220,6 +220,9 @@ async def mpesa_donate(data: DonationRequest, db: AsyncSession = Depends(get_db)
         }
         headers = {"Authorization": f"Bearer {token}"}
         
+        # DEBUG: Log exact payload being sent to Safaricom
+        logger.info("Sending STK Push Payload to Safaricom: %s", json.dumps(payload, indent=2))
+        
         resp = await asyncio.to_thread(_send_stk_push, payload, headers)
         resp.raise_for_status()
         result = resp.json()
