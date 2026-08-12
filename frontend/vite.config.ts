@@ -11,15 +11,18 @@ export default defineConfig({
   build: {
     // 1. Disable sourcemaps in production to prevent source code exposure
     sourcemap: false,
-    minify: 'esbuild',
+    // 2. Use terser to drop console.log and debugger statements
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: undefined,
       }
     }
-  },
-  esbuild: {
-    // 2. Drop console.log and debugger statements in production builds
-    drop: ['console', 'debugger']
   }
 })
