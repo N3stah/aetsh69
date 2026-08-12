@@ -63,6 +63,7 @@ class Settings(BaseSettings):
     MPESA_SHORTCODE: str = ""
     MPESA_PASSKEY: str = ""
     MPESA_CALLBACK_URL: str = ""
+    RESEND_API_KEY: str = ""
     MPESA_ENV: str = "sandbox"
     
     # Debug

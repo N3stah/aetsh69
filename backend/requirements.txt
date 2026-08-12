@@ -101,3 +101,4 @@ mypy==1.11.2
 pre-commit==3.8.0
 openai
 cloudinary==1.41.0
+resend==2.4.0
