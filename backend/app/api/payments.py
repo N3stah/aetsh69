@@ -248,7 +248,7 @@ async def mpesa_donate(data: DonationRequest, db: AsyncSession = Depends(get_db)
         }
 
     except requests.RequestException as e:
-        logger.error("Donation STK Push failed: %s", e)
+        logger.error("Donation STK Push failed: %s | Safaricom Response: %s", e, getattr(e.response, "text", "No response"))
         raise HTTPException(status_code=502, detail="Could not reach M-Pesa. Try again.")
 
 @router.get("/status/{payment_id}")
