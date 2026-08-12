@@ -198,10 +198,14 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
 
 # ---------- Email Verification ----------
 def send_verification_email(to_email: str, token: str, full_name: str | None):
-    if not settings.RESEND_API_KEY:
-        logger.warning("Resend API key not configured — skipping verification email")
+    if not settings.SMTP_USER or not settings.SMTP_PASSWORD:
+        logger.warning("SMTP not configured — skipping verification email")
         return
     verify_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "Verify your AETSH-69 account"
+    msg["From"] = f"{settings.SMTP_FROM_NAME} <{settings.SMTP_FROM_EMAIL}>"
+    msg["To"] = to_email
     name = full_name or to_email.split("@")[0]
     html = f"""
     <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#161614;color:#F2EFE9;border-radius:8px">
@@ -211,18 +215,16 @@ def send_verification_email(to_email: str, token: str, full_name: str | None):
       <p style="color:#6B6860;font-size:12px;margin-top:24px">Link expires in 24 hours. If you didn't register, ignore this email.</p>
     </div>
     """
+    msg.attach(MIMEText(html, "html"))
     try:
-        import resend
-        resend.api_key = settings.RESEND_API_KEY
-        r = resend.Emails.send(
-            from_="AETSH-69 <onboarding@resend.dev>",
-            to=to_email,
-            subject="Verify your AETSH-69 account",
-            html=html,
-        )
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+            server.starttls()
+            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+            server.sendmail(settings.SMTP_FROM_EMAIL, to_email, msg.as_string())
         logger.info("Verification email sent to %s", to_email)
     except Exception as e:
-        logger.error("Failed to send verification email via Resend: %s", e)
+        logger.error("Failed to send verification email: %s", e)
+        raise Exception("Failed to send email")
 
 @router.post("/send-verification")
 async def send_verification(request: Request, db: AsyncSession = Depends(get_db)):
