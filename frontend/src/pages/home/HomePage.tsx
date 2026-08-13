@@ -12,8 +12,6 @@ import {
   Terminal
 } from 'lucide-react';
 
-// Fix: Import image explicitly for Vite to handle bundling correctly
-
 const sections = [
   { 
     icon: Code2, 
