@@ -1,0 +1,2 @@
+# Database Schemas & Data Models
+Core tables include `users` (auth, roles, JWT management), `memberships` (tier permissions), `ai_knowledge_base` (pgvector semantic store with 1536-dimensional embeddings), `ai_conversations` & `ai_messages` (chat memory persistence), `blog_posts`, `projects`, and `analytics_events`. Foreign key relationships enforce data integrity. RAG vector search uses cosine similarity distance metrics for high-accuracy semantic retrieval.

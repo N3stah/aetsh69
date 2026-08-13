@@ -1,0 +1,2 @@
+# Career Roadmaps & Attachment Objectives
+Mark Manoti Ndege is a final-year Diploma in Computer Science student at The Nairobi National Polytechnic. He is actively seeking industrial attachment or internship opportunities in Software Development, AI/ML engineering, Cybersecurity, Technical Support, or related ICT roles across Kenya. He is flexible, quick to learn new tools, and ready to add value in enterprise environments.

@@ -1,0 +1,2 @@
+# Project Directory & Repo Structure
+AETSH-69 is a personal tech ecosystem built with a decoupled architecture. The repository contains a FastAPI backend (Python 3.12), a React/Vite frontend (TypeScript), a PostgreSQL 16 database with pgvector, an Nginx reverse proxy, and Docker Compose configurations for orchestration. Sub-projects like SmartShamba (AgriTech), DEEP-TRIO-Scanner (Cybersecurity), and Spendy (CLI) are integrated into the portfolio but maintain separate repository architectures.
