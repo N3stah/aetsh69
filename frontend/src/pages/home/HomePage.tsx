@@ -12,6 +12,9 @@ import {
   Terminal
 } from 'lucide-react';
 
+// Fix: Import image explicitly for Vite to handle bundling correctly
+import markPhoto from '/mark-homepage-image1.jpeg';
+
 const sections = [
   { 
     icon: Code2, 
@@ -123,7 +126,7 @@ export default function HomePage() {
                 {/* Inner Image Container */}
                 <div className="relative overflow-hidden rounded-2xl aspect-[3/4] bg-zinc-950">
                   <img
-                    src="/mark-homepage-image1.jpeg"
+                    src={markPhoto}
                     alt="Mark Manoti Ndege"
                     className="w-full h-full object-cover object-center grayscale hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
                   />
@@ -132,13 +135,10 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent pointer-events-none" />
                 </div>
 
-                {/* Floating Architectural Badge */}
-                <div className="absolute bottom-6 left-6 right-6 p-3 rounded-xl bg-zinc-950/80 backdrop-blur-md border border-white/10 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Terminal className="w-4 h-4 text-[#D96B43]"/>
-                    <span className="font-mono text-xs text-zinc-200 tracking-wider">MARK MANOTI</span>
-                  </div>
-                  <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">[ CTO & BUILDER ]</span>
+                {/* Simplified Floating Architectural Badge */}
+                <div className="absolute bottom-4 left-4 right-4 p-2.5 rounded-xl bg-zinc-950/80 backdrop-blur-md border border-white/10 flex items-center justify-center gap-2">
+                  <Terminal className="w-4 h-4 text-[#D96B43]"/>
+                  <span className="font-mono text-xs font-medium text-zinc-200 tracking-wider">MARK MANOTI</span>
                 </div>
 
               </div>
