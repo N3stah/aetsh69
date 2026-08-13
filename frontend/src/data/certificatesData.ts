@@ -6,6 +6,8 @@ export interface Certificate {
   category: 'AI & ML' | 'Cybersecurity' | 'Networking & IoT' | 'Hackathons & Bootcamps';
   filePath: string;
   format: 'PDF' | 'Image';
+  credentialId?: string;
+  verificationUrl?: string;
 }
 
 export const CERTIFICATES_DATA: Certificate[] = [
@@ -52,7 +54,8 @@ export const CERTIFICATES_DATA: Certificate[] = [
     date: 'March 17, 2026',
     category: 'Networking & IoT',
     filePath: '/assets_achieved/Certificates/PDF_Certificates/Getting_Started_with_Cisco_Packet_Tracer_certificate_markmanoti69-gmail-com_90786363-26c5-41cc-a4a8-3ad3815c7333.pdf',
-    format: 'PDF'
+    format: 'PDF',
+    verificationUrl: 'https://www.credly.com/badges/your-cisco-badge' // Replace with actual Credly link if available
   },
   {
     id: 'iot-foundation',
