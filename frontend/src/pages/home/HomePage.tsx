@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 
 // Fix: Import image explicitly for Vite to handle bundling correctly
-import markPhoto from '/mark-homepage-image1.jpeg';
 
 const sections = [
   { 
@@ -126,7 +125,7 @@ export default function HomePage() {
                 {/* Inner Image Container */}
                 <div className="relative overflow-hidden rounded-2xl aspect-[3/4] bg-zinc-950">
                   <img
-                    src={markPhoto}
+                    src="/mark-homepage-image1.jpeg"
                     alt="Mark Manoti Ndege"
                     className="w-full h-full object-cover object-center grayscale hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
                   />
