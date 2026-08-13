@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Github, ExternalLink, Terminal } from 'lucide-react';
+import { Code2, ExternalLink, Terminal } from 'lucide-react';
 import { PROJECTS_DATA } from '../../data/projectsData';
 
 export default function PortfolioPage() {
@@ -110,7 +110,7 @@ export default function PortfolioPage() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-400 hover:text-white transition-colors"
                   >
-                    <Github className="w-4 h-4"/>
+                    <Code2 className="w-4 h-4"/>
                     <span>Source Code</span>
                   </a>
 
