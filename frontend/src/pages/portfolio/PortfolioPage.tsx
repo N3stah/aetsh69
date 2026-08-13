@@ -1,81 +1,137 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { portfolioService, type Project } from '../../services/portfolio';
-import { ExternalLink, Code2, Tag } from 'lucide-react';
-
-const CATEGORIES = ['All', 'AI', 'Web', 'IoT', 'Mobile', 'Other'];
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Github, ExternalLink, Terminal } from 'lucide-react';
+import { PROJECTS_DATA } from '../../data/projectsData';
 
 export default function PortfolioPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [filtered, setFiltered] = useState<Project[]>([]);
-  const [category, setCategory] = useState('All');
-  const [error, setError] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string>('All');
 
-  useEffect(() => {
-    portfolioService.listProjects().then(data => { setProjects(data); setFiltered(data); }).catch(() => setError('Could not load projects.'));
-  }, []);
+  const categories = ['All', 'Flagship', 'AI', 'Cybersecurity', 'Systems/CLI'];
 
-  useEffect(() => {
-    setFiltered(category === 'All' ? projects : projects.filter(p => p.category === category || p.tags?.includes(category)));
-  }, [category, projects]);
+  const filteredProjects = activeFilter === 'All'
+    ? PROJECTS_DATA
+    : PROJECTS_DATA.filter((p) => p.category === activeFilter);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-16">
-      <div className="max-w-2xl mb-10">
-        <p className="text-rust font-mono text-sm mb-2">Portfolio</p>
-        <h1 className="font-display text-4xl md:text-5xl font-semibold text-ink mb-4">Projects</h1>
-        <p className="text-ink-muted text-lg leading-relaxed">Engineering projects, AI experiments, and products built from Nairobi.</p>
+    <div className="space-y-10 pb-20 pt-6 max-w-7xl mx-auto px-6">
+      
+      {/* Header Section */}
+      <div className="space-y-4 max-w-3xl">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-[#D96B43]">
+          <Terminal className="w-3.5 h-3.5 text-[#D96B43]"/>
+          <span>ENGINEERING // REPOSITORIES</span>
+        </div>
+        <h1 className="text-4xl sm:text-5xl font-serif font-bold text-zinc-100">
+          Projects & Codebases
+        </h1>
+        <p className="text-zinc-400 text-base sm:text-lg leading-relaxed">
+          Full-stack web applications, AI RAG systems, machine learning scanners, and system-level tooling engineered by Mark Manoti Ndege from Nairobi, Kenya.
+        </p>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-10">
-        {CATEGORIES.map(cat => (
-          <button key={cat} onClick={() => setCategory(cat)}
-            className={`text-sm px-4 py-1.5 rounded-full border transition-colors ${category === cat ? 'border-rust text-rust bg-rust/5' : 'border-line text-ink-muted hover:border-rust/40'}`}>
-            {cat}
+      {/* Category Filter Pills */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-800 pb-4">
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setActiveFilter(cat)}
+            className={`px-4 py-2 rounded-lg text-xs font-mono transition-all duration-200 ${
+              activeFilter === cat
+                ? 'bg-[#C25932] text-white font-semibold shadow-md shadow-[#C25932]/20'
+                : 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+            }`}
+          >
+            {cat} {cat === 'All' ? `(${PROJECTS_DATA.length})` : ''}
           </button>
         ))}
       </div>
 
-      {error && <div className="card border-rust/30 mb-6"><p className="text-rust text-sm">{error}</p></div>}
+      {/* Bento Grid Matrix */}
+      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[280px]">
+        <AnimatePresence>
+          {filteredProjects.map((project) => (
+            <motion.div
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              key={project.id}
+              className={`group relative p-6 rounded-2xl bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/80 hover:border-[#D96B43]/50 transition-all duration-300 flex flex-col justify-between overflow-hidden ${
+                project.id === 'smartshamba' ? 'lg:col-span-2 lg:row-span-2 border-[#D96B43]/30 bg-gradient-to-br from-zinc-900/90 via-zinc-900/60 to-[#C25932]/10' : ''
+              } ${project.id === 'aetsh69' ? 'lg:col-span-2' : ''}`}
+            >
+              {/* Card Header & Badges */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="px-2.5 py-1 rounded-full bg-zinc-800/80 text-[10px] font-mono tracking-widest text-[#D96B43] uppercase border border-zinc-700/50">
+                    {project.category}
+                  </span>
+                  {project.metrics && (
+                    <span className="text-[11px] font-mono text-zinc-500 hidden sm:block">
+                      {project.metrics}
+                    </span>
+                  )}
+                </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map(project => (
-          <div key={project.id} className="card card-hover flex flex-col group">
-            {project.image_url ? (
-              <img src={project.image_url} alt={project.name} className="w-full h-48 object-cover rounded-md mb-4 border border-line" />
-            ) : (
-              <div className="w-full h-48 bg-canvas-overlay rounded-md mb-4 border border-line flex items-center justify-center">
-                <Tag size={28} className="text-ink-faint" />
+                <div>
+                  <h3 className="text-2xl font-serif font-bold text-zinc-100 group-hover:text-[#D96B43] transition-colors">
+                    {project.title}
+                  </h3>
+                  <p className="text-xs font-mono text-zinc-400 mt-1">
+                    {project.subtitle}
+                  </p>
+                </div>
+
+                <p className="text-sm text-zinc-300 leading-relaxed">
+                  {project.description}
+                </p>
               </div>
-            )}
-            <div className="flex items-start justify-between mb-2">
-              <h2 className="font-display text-lg font-semibold text-ink group-hover:text-rust transition-colors">{project.name || project.title}</h2>
-              {project.category && <span className="text-[10px] px-2 py-0.5 rounded-full bg-rust/10 text-rust font-mono flex-shrink-0 ml-2">{project.category}</span>}
-            </div>
-            <p className="text-ink-muted text-sm leading-relaxed flex-1 mb-4">{project.description || project.short_description}</p>
-            {project.tech_stack && project.tech_stack.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-4">
-                {project.tech_stack.slice(0, 4).map((tech: string) => (
-                  <span key={tech} className="text-[10px] px-2 py-0.5 rounded border border-line text-ink-faint">{tech}</span>
-                ))}
+
+              {/* Tech Stack Badges & Links */}
+              <div className="space-y-6 pt-6 mt-auto">
+                {/* Tech Stack Pills */}
+                <div className="flex flex-wrap gap-1.5">
+                  {project.techStack.map((tech) => (
+                    <span
+                      key={tech}
+                      className="px-2.5 py-1 rounded-md bg-zinc-950/80 text-zinc-300 font-mono text-[11px] border border-zinc-800"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Card Action Links */}
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60">
+                  <a
+                    href={project.githubUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-400 hover:text-white transition-colors"
+                  >
+                    <Github className="w-4 h-4"/>
+                    <span>Source Code</span>
+                  </a>
+
+                  {project.liveUrl && (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C25932] hover:bg-[#d96b43] text-white font-mono text-xs transition-colors shadow-sm"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5"/>
+                      <span>Live App</span>
+                    </a>
+                  )}
+                </div>
               </div>
-            )}
-            <div className="flex items-center gap-3 pt-3 border-t border-line mt-auto">
-              <Link to={`/portfolio/${project.slug}`} className="btn-secondary text-xs flex-1 text-center">View details</Link>
-              {project.demo_url && (
-                <a href={project.demo_url} target="_blank" rel="noopener noreferrer" className="btn-ghost text-xs flex items-center gap-1">
-                  <ExternalLink size={12} /> Demo
-                </a>
-              )}
-              {project.github_url && (
-                <a href={project.github_url} target="_blank" rel="noopener noreferrer" className="btn-ghost text-xs flex items-center gap-1">
-                  <Code2 size={12} /> Code
-                </a>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
+
     </div>
   );
 }
