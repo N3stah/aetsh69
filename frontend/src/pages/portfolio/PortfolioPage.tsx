@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Code2, ExternalLink, Terminal } from 'lucide-react';
 import { PROJECTS_DATA } from '../../data/projectsData';
+import CertificatesSection from '../../components/portfolio/CertificatesSection';
 
 export default function PortfolioPage() {
   const [activeFilter, setActiveFilter] = useState<string>('All');
@@ -131,6 +132,8 @@ export default function PortfolioPage() {
           ))}
         </AnimatePresence>
       </motion.div>
+
+      <CertificatesSection />
 
     </div>
   );
