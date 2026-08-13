@@ -1,141 +1,115 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, Search, Tag, Plus } from 'lucide-react';
-import api from '../../services/api';
-import { useAuthStore } from '../../store/authStore';
-import { AddItemModal } from '../../components/admin/AddItemModal';
-
-interface BlogPost {
-  id: string; title: string; slug: string; excerpt?: string;
-  cover_image?: string; cover_image_url?: string; category?: string; category_name?: string;
-  published_at?: string; reading_time?: number; tags?: string[];
-}
+import { Search, Terminal, ArrowRight, Clock } from 'lucide-react';
+import { BLOG_POSTS } from '../../data/blogData';
 
 export default function BlogPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [filtered, setFiltered] = useState<BlogPost[]>([]);
-  const [search, setSearch] = useState('');
-  const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  const user = useAuthStore((state) => state.user);
-  const isAdmin = user?.role === 'admin';
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
 
-  useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      try {
-        const res = await api.get('/blog/posts');
-        if (mounted) {
-          const arr = res.data?.posts || [];
-          setPosts(arr);
-          setFiltered(arr);
-        }
-      } catch {
-        if (mounted) setError('Could not load posts.');
-      }
-    };
-    load();
-    return () => { mounted = false; };
-  }, []);
+  const categories = ['All', 'Machine Learning', 'DevOps', 'Computer Science', 'AgriTech'];
 
-  useEffect(() => {
-    let result = posts;
-    if (search) result = result.filter(p => p.title.toLowerCase().includes(search.toLowerCase()) || p.excerpt?.toLowerCase().includes(search.toLowerCase()));
-    if (activeTag) result = result.filter(p => p.tags?.includes(activeTag));
-    setFiltered(result);
-  }, [search, activeTag, posts]);
-
-  const allTags = [...new Set((Array.isArray(posts) ? posts : []).flatMap(p => p.tags || []))];
-
-  const handleAddPost = async (data: Record<string, string | number | string[]>) => {
-    await api.post('/blog/posts', {
-      title: data.title,
-      excerpt: data.excerpt,
-      content: data.content,
-      cover_image_url: data.cover_image_url,
-      status: 'published'
-    });
-    const res = await api.get('/blog/posts');
-    setPosts(res.data?.posts || []);
-  };
-
-  const modalFields = [
-    { name: 'title', label: 'Title', type: 'text' as const, placeholder: 'My New Post' },
-    { name: 'excerpt', label: 'Excerpt', type: 'textarea' as const, placeholder: 'Short summary...' },
-    { name: 'content', label: 'Content (Markdown)', type: 'textarea' as const, placeholder: 'Write your post here...' },
-    { name: 'cover_image_url', label: 'Cover Image', type: 'file' as const }
-  ];
+  const filteredPosts = BLOG_POSTS.filter(post => {
+    const matchesCategory = activeCategory === 'All' || post.category === activeCategory;
+    const matchesSearch = 
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-16">
-      <div className="mb-10 flex justify-between items-start">
-        <div>
-          <p className="text-rust font-mono text-sm mb-2">Blog</p>
-          <h1 className="font-display text-4xl md:text-5xl font-semibold text-ink mb-4">Writing</h1>
-          <p className="text-ink-muted text-lg leading-relaxed">Engineering deep dives, tutorials, and thoughts from Nairobi.</p>
+    <div className="space-y-10 pb-20 pt-6 max-w-7xl mx-auto px-6">
+      
+      {/* Header Section */}
+      <div className="space-y-4 max-w-3xl">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-[#D96B43]">
+          <Terminal className="w-3.5 h-3.5 text-[#D96B43]"/>
+          <span>TECHNICAL WRITING // ENGINEERING LOG</span>
         </div>
-        {isAdmin && (
-          <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2 px-4 py-2 rounded text-sm mt-2">
-            <Plus size={16} /> New Post
-          </button>
-        )}
+        <h1 className="text-4xl sm:text-5xl font-serif font-bold tracking-tight text-zinc-100">
+          The AETSH-69 Blog
+        </h1>
+        <p className="text-zinc-400 text-base sm:text-lg leading-relaxed">
+          Deep dives into systems architecture, AI tooling, DevOps, and building technology in Nairobi.
+        </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-8">
-        <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
-          <input className="input-field w-full pl-9 text-sm" placeholder="Search posts..." value={search} onChange={e => setSearch(e.target.value)} />
-        </div>
-      </div>
-
-      {allTags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-8">
-          <button onClick={() => setActiveTag(null)} className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${!activeTag ? 'border-rust text-rust bg-rust/5' : 'border-line text-ink-muted hover:border-rust/40'}`}>All</button>
-          {allTags.map(tag => (
-            <button key={tag} onClick={() => setActiveTag(activeTag === tag ? null : tag)} className={`text-xs px-3 py-1.5 rounded-full border transition-colors flex items-center gap-1 ${activeTag === tag ? 'border-rust text-rust bg-rust/5' : 'border-line text-ink-muted hover:border-rust/40'}`}>
-              <Tag size={10} /> {tag}
+      {/* Search & Filter Controls */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all duration-200 ${
+                activeCategory === cat
+                  ? 'bg-[#C25932] text-white font-semibold'
+                  : 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+              }`}
+            >
+              {cat}
             </button>
           ))}
         </div>
-      )}
 
-      {error && <div className="card border-rust/30 mb-6"><p className="text-rust text-sm">{error}</p></div>}
-
-      {filtered.length === 0 && !error && (
-        <div className="text-center py-16">
-          <p className="text-ink-muted">No posts found{search ? ` for "${search}"` : ''}.</p>
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <input 
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search articles..."
+            className="w-full pl-9 pr-4 py-2 rounded-lg bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 focus:border-[#D96B43]/50 focus:outline-none text-sm text-zinc-200 placeholder:text-zinc-500 transition-colors"
+          />
         </div>
-      )}
+      </div>
 
-      <div className="space-y-6">
-        {filtered.map(post => (
-          <Link key={post.id} to={`/blog/${post.slug}`} className="block group">
-            <article className="card card-hover flex gap-6">
-              {(post.cover_image || post.cover_image_url) && (
-                <img src={post.cover_image || post.cover_image_url} alt={post.title} className="w-32 h-24 object-cover rounded-md border border-line flex-shrink-0 hidden sm:block" />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-2">
-                  {(post.category || post.category_name) && <span className="text-xs px-2 py-0.5 rounded-full bg-rust/10 text-rust font-mono">{post.category || post.category_name}</span>}
-                  {post.published_at && <span className="text-ink-faint text-xs">{new Date(post.published_at).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
-                  {post.reading_time && <span className="text-ink-faint text-xs flex items-center gap-1"><Clock size={10} /> {post.reading_time} min</span>}
-                </div>
-                <h2 className="font-display text-xl font-semibold text-ink mb-2 group-hover:text-rust transition-colors">{post.title}</h2>
-                {post.excerpt && <p className="text-ink-muted text-sm leading-relaxed line-clamp-2">{post.excerpt}</p>}
-                {post.tags && post.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {post.tags.slice(0, 4).map(tag => <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full border border-line text-ink-faint">{tag}</span>)}
-                  </div>
-                )}
+      {/* Blog Grid (Glassmorphism) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {filteredPosts.map((post) => (
+          <Link 
+            to={`/blog/${post.slug}`} 
+            key={post.id} 
+            className="group p-6 rounded-2xl bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/80 hover:border-[#D96B43]/50 transition-all duration-300 flex flex-col justify-between min-h-[280px] shadow-lg hover:shadow-[#D96B43]/10"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-1 rounded-full bg-zinc-800/80 text-[10px] font-mono tracking-widest text-[#D96B43] uppercase border border-zinc-700/50">
+                  {post.category}
+                </span>
+                <span className="text-[11px] font-mono text-zinc-500 hidden sm:flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> {post.readingTime}
+                </span>
               </div>
-            </article>
+              <h2 className="text-xl font-serif font-bold tracking-tight text-zinc-100 group-hover:text-[#D96B43] transition-colors leading-snug">
+                {post.title}
+              </h2>
+              <p className="text-sm text-zinc-400 leading-relaxed">{post.excerpt}</p>
+            </div>
+            <div className="pt-6 mt-auto">
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {post.tags.slice(0, 3).map(tag => (
+                  <span key={tag} className="px-2 py-0.5 rounded-md bg-zinc-950/80 text-zinc-400 font-mono text-[10px] border border-zinc-800">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className="flex items-center gap-1 text-xs font-mono text-[#D96B43] group-hover:translate-x-1 transition-transform">
+                <span>Read Article</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
+            </div>
           </Link>
         ))}
       </div>
 
-      <AddItemModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleAddPost} title="Add New Post" fields={modalFields} />
+      {filteredPosts.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-zinc-500 font-mono">No articles found matching your search.</p>
+        </div>
+      )}
+
     </div>
   );
 }
