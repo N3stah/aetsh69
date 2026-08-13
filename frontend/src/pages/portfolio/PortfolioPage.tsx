@@ -46,8 +46,8 @@ export default function PortfolioPage() {
         ))}
       </div>
 
-      {/* Bento Grid Matrix */}
-      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[280px]">
+      {/* Bento Grid Matrix - Fixed Height Constraints Removed for Mobile */}
+      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
           {filteredProjects.map((project) => (
             <motion.div
@@ -57,9 +57,9 @@ export default function PortfolioPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
               key={project.id}
-              className={`group relative p-6 rounded-2xl bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/80 hover:border-[#D96B43]/50 transition-all duration-300 flex flex-col justify-between overflow-hidden ${
-                project.id === 'smartshamba' ? 'lg:col-span-2 lg:row-span-2 border-[#D96B43]/30 bg-gradient-to-br from-zinc-900/90 via-zinc-900/60 to-[#C25932]/10' : ''
-              } ${project.id === 'aetsh69' ? 'lg:col-span-2' : ''}`}
+              className={`group relative p-6 rounded-2xl bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/80 hover:border-[#D96B43]/50 transition-all duration-300 flex flex-col justify-between min-h-[320px] h-auto overflow-hidden ${
+                project.id === 'smartshamba' ? 'md:col-span-2 border-[#D96B43]/30 bg-gradient-to-br from-zinc-900/90 via-zinc-900/60 to-[#C25932]/10' : ''
+              } ${project.id === 'aetsh69' ? 'md:col-span-2' : ''}`}
             >
               {/* Card Header & Badges */}
               <div className="space-y-4">
@@ -102,13 +102,13 @@ export default function PortfolioPage() {
                   ))}
                 </div>
 
-                {/* Card Action Links */}
-                <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60">
+                {/* Card Action Links - Explicit Buttons */}
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60 gap-2 flex-wrap">
                   <a
                     href={project.githubUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-400 hover:text-white transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-300 hover:text-white transition-colors bg-zinc-800/60 px-3 py-1.5 rounded-lg"
                   >
                     <Code2 className="w-4 h-4"/>
                     <span>Source Code</span>
