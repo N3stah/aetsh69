@@ -80,10 +80,26 @@ export default function HomePage() {
               <span className="text-zinc-200">Ndege</span>
             </h1>
 
-            {/* Subtitle / Pitch */}
-            <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl leading-relaxed">
-              Software engineer, AI builder, and technologist. I design and ship full-stack systems, AI-powered products, and IT services — from Nairobi to the world.
+            {/* Subtitle / Tagline */}
+            <p className="text-lg sm:text-xl text-zinc-300 max-w-2xl leading-relaxed font-medium">
+              Computer Science Diploma Student | Full-Stack Builder | AI & Cybersecurity Enthusiast
             </p>
+            <p className="text-sm text-zinc-500 font-mono">
+              Building practical systems from Nairobi, Kenya
+            </p>
+
+            {/* Main About / Summary Paragraphs */}
+            <div className="space-y-4 max-w-2xl text-zinc-400 text-base leading-relaxed">
+              <p>
+                I am a final-year Diploma in Computer Science student at The Nairobi National Polytechnic with a strong foundation in core computing principles and a proven drive to build real systems. Through my coursework I have gained solid knowledge in Computer Organization & Architecture, Operating Systems, Networking & Distributed Systems, Database Management, Algorithms & Data Structures, Programming (Python & Java), Web Design, and Information Systems.
+              </p>
+              <p>
+                Beyond the classroom, I actively design and ship projects that apply these skills. My work includes full-stack web applications, AI-powered tools (including a machine learning malware detection scanner and a RAG-based platform), containerized multi-service systems, and practical CLI utilities. I have also completed professional certifications in Artificial Intelligence & Machine Learning (Foundation and Intermediate), Cybersecurity, Blockchain, Internet of Things, and Cisco Packet Tracer through the University of Nairobi’s KITI programme and Cisco Networking Academy.
+              </p>
+              <p>
+                I am currently seeking industrial attachment or internship opportunities where I can contribute to real-world systems, learn enterprise best practices, and grow as a technologist. I am flexible, quick to learn new tools, and ready to add value in software development, AI/ML, cybersecurity, technical support, or related ICT roles.
+              </p>
+            </div>
 
             {/* CTA Buttons & Support Badge */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
