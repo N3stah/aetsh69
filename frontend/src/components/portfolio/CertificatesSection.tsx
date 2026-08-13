@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, ExternalLink, LayoutGrid, List, Award, CheckCircle2, X, Download } from 'lucide-react';
-import { CERTIFICATES_DATA, Certificate } from '../../data/certificatesData';
+import { CERTIFICATES_DATA } from '../../data/certificatesData';
+import type { Certificate } from '../../data/certificatesData';
 
 export default function CertificatesSection() {
   const [activeFilter, setActiveFilter] = useState('All');
