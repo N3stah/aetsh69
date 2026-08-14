@@ -23,6 +23,18 @@
   --color-warn: #B89856;
   --color-err: #A85A4A;
 
+  /* Map Tailwind Zinc to Semantic Variables for Global Theme Support */
+  --color-zinc-950: var(--color-canvas);
+  --color-zinc-900: var(--color-canvas-raised);
+  --color-zinc-800: var(--color-canvas-overlay);
+  --color-zinc-700: var(--color-canvas-overlay);
+  --color-zinc-600: var(--color-ink-faint);
+  --color-zinc-500: var(--color-ink-faint);
+  --color-zinc-400: var(--color-ink-muted);
+  --color-zinc-300: var(--color-ink-muted);
+  --color-zinc-200: var(--color-ink-muted);
+  --color-zinc-100: var(--color-ink);
+
   /* Typography */
   --font-display: "Fraunces", Georgia, serif;
   --font-sans: "General Sans", system-ui, sans-serif;
@@ -60,6 +72,9 @@
 }
 
 @layer base {
+  body, div, section, header, footer, nav, a, button, input, textarea, span {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
   body {
     background-color: var(--color-canvas);
     color: var(--color-ink);

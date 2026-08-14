@@ -5,7 +5,7 @@ import AetshChatWidget from '../components/aetsh69/AetshChatWidget';
 
 export default function MainLayout() {
   return (
-    <div className="min-h-screen flex flex-col bg-base">
+    <div className="min-h-screen flex flex-col bg-canvas">
       <Header />
       <main className="flex-1">
         <Outlet />
