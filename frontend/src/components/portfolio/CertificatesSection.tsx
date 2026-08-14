@@ -151,12 +151,25 @@ export default function CertificatesSection() {
                     </span>
                   </div>
                 ) : selectedCert.format === 'PDF' ? (
-                  <iframe 
-                    src={selectedCert.fileUrl} 
-                    className="w-full h-full border-0" 
-                    title={selectedCert.title}
-                    onError={() => setHasError(true)}
-                  ></iframe>
+                  <object 
+                    data={selectedCert.fileUrl} 
+                    type="application/pdf" 
+                    className="w-full h-full"
+                    aria-label={selectedCert.title}
+                  >
+                    <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                      <FileText className="w-12 h-12 text-zinc-600 mb-4" />
+                      <p className="text-zinc-400 text-sm mb-4">Your browser cannot display PDFs inline.</p>
+                      <a 
+                        href={selectedCert.fileUrl} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#C25932] hover:bg-[#d96b43] text-white font-mono text-xs"
+                      >
+                        <ExternalLink className="w-4 h-4" /> Open in New Tab
+                      </a>
+                    </div>
+                  </object>
                 ) : (
                   <img 
                     src={selectedCert.fileUrl} 
