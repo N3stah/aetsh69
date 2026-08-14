@@ -9,6 +9,7 @@ export interface CartItem {
   currency: string;
   quantity: number;
   image_url?: string;
+  estimateType?: string;
   category?: string;
 }
 

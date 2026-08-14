@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Tv, Camera, Wifi, Laptop, FileText, Briefcase, Code2, X, Plus, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { SERVICES_DATA, WEB_DEV_TIERS, ServiceCategory } from '../../data/servicesData';
+import { Tv, Camera, Wifi, Laptop, FileText, Briefcase, Code2, X, Plus, ArrowRight } from 'lucide-react';
+import { SERVICES_DATA, WEB_DEV_TIERS } from '../../data/servicesData';
+import type { ServiceCategory } from '../../data/servicesData';
 import { useCartStore } from '../../store/cartStore';
 
 const iconMap = { Tv, Camera, Wifi, Laptop, FileText, Briefcase, Code2 };
@@ -9,17 +10,19 @@ const iconMap = { Tv, Camera, Wifi, Laptop, FileText, Briefcase, Code2 };
 export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
   const addItem = useCartStore((state) => state.addItem);
-  const setIsCartOpen = useCartStore((state) => state.setIsCartOpen);
+  const openCart = useCartStore((state) => state.openCart);
 
   const handleAddToCart = (service: any, categoryName: string) => {
     addItem({
       id: service.id,
+      slug: service.id,
       name: service.name,
       price: service.price,
+      currency: 'KES',
       category: categoryName,
       estimateType: service.estimateType
     });
-    setIsCartOpen(true);
+    openCart();
   };
 
   return (
