@@ -16,7 +16,7 @@ export const PRODUCTS_DATA: Product[] = [
     price: 28000,
     category: 'Networking & Starlink',
     description: 'Official standalone SpaceX Starlink Mesh router for expanding Wi-Fi range.',
-    image: '/Shop_Images/SpaceX_Starlink_Mesh_WiFi_Router.jpg'
+    image: '/Shop_Images/SpaceX_Starlink_Router.webp'
   },
   {
     id: 'tp-link-router',
@@ -25,7 +25,7 @@ export const PRODUCTS_DATA: Product[] = [
     price: 3800,
     category: 'Networking & Starlink',
     description: 'Dual-band high-gain antennas for home and office fiber optic extensions.',
-    image: '/Shop_Images/TP-Link_AC1200_Dual-Band_Router.jpg'
+    image: '/Shop_Images/TP-Link_AC1200_Router.jpg'
   },
   {
     id: 'pocket-mifi',
@@ -34,7 +34,7 @@ export const PRODUCTS_DATA: Product[] = [
     price: 3200,
     category: 'Networking & Starlink',
     description: 'Unlocked mobile Wi-Fi hotspot supporting Safaricom, Airtel, and Faiba 4G SIM cards.',
-    image: '/Shop_Images/4G_LTE_Portable_Pocket_MiFi.jpg'
+    image: '/Shop_Images/4G_LTE_Pocket_MiFi.jpg'
   },
   {
     id: 'cat6-cable',
@@ -43,7 +43,7 @@ export const PRODUCTS_DATA: Product[] = [
     price: 50,
     category: 'Networking & Starlink',
     description: 'Pure copper weather-resistant Cat6 network cable cut to custom length.',
-    image: '/Shop_Images/Cat6_Outdoor_LAN_Ethernet_Cable.jpg'
+    image: '/Shop_Images/Cat6_Outdoor_LAN_Cable.webp'
   },
   {
     id: 'cat6-patch-cord',
@@ -52,7 +52,7 @@ export const PRODUCTS_DATA: Product[] = [
     price: 650,
     category: 'Networking & Starlink',
     description: 'Factory-molded RJ45 Ethernet patch cable for high-speed routers and PCs.',
-    image: '/Shop_Images/Pre-Crimped_Cat6_Patch_Cord.jpg'
+    image: '/Shop_Images/Pre-Crimped_Cat6_Patch_Cord.jpeg'
   },
   {
     id: 'v380-camera',
@@ -61,7 +61,7 @@ export const PRODUCTS_DATA: Product[] = [
     price: 2500,
     category: 'CCTV & Security',
     description: 'HD night-vision Wi-Fi camera with 360° motion tracking and two-way audio.',
-    image: '/Shop_Images/V380_Mini_Wireless_Smart_CCTV_Camera.jpg'
+    image: '/Shop_Images/V380_Smart_CCTV_Camera.webp'
   },
   {
     id: 'firestick-4k',
@@ -70,7 +70,7 @@ export const PRODUCTS_DATA: Product[] = [
     price: 7000,
     category: 'Streaming & Media',
     description: 'Ultra HD streaming media player pre-configured for IPTV, Stremio, and Netflix.',
-    image: '/Shop_Images/Amazon_Fire_TV_Stick_4K_Max.jpg'
+    image: '/Shop_Images/Amazon_Fire_TV_Stick_4K_Max.jpeg'
   },
   {
     id: 'blank-dvds',
@@ -79,7 +79,7 @@ export const PRODUCTS_DATA: Product[] = [
     price: 450,
     category: 'Streaming & Media',
     description: '4.7GB blank DVD-R discs for data archiving, media burning, and system backups.',
-    image: '/Shop_Images/Blank_DVD-R_Discs.jpg'
+    image: '/Shop_Images/Blank_DVD-R_Discs.jpeg'
   },
   {
     id: 'ddr4-8gb-ram',
@@ -97,7 +97,7 @@ export const PRODUCTS_DATA: Product[] = [
     price: 3800,
     category: 'PC Upgrades',
     description: 'High-speed internal SSD with boot speeds up to 2100MB/s for laptops and PCs.',
-    image: '/Shop_Images/256GB_M.2_NVM_Solid_State_Drive.jpg'
+    image: '/Shop_Images/256GB_NVMe_SSD.jpeg'
   },
   {
     id: 'precision-screwdriver-kit',
@@ -106,7 +106,7 @@ export const PRODUCTS_DATA: Product[] = [
     price: 850,
     category: 'Tools & Accessories',
     description: 'Magnetic screwdriver set for opening laptops, smartphones, and electronics.',
-    image: '/Shop_Images/Professional_25-in-1_Precision_Screwdriver_Kit.jpg'
+    image: '/Shop_Images/Precision_Screwdriver_Kit.jpeg'
   },
   {
     id: 'network-toolkit',
@@ -115,7 +115,7 @@ export const PRODUCTS_DATA: Product[] = [
     price: 1800,
     category: 'Tools & Accessories',
     description: 'Heavy-duty LAN cable crimping tool, wire stripper, RJ45 tester, and 20 modular plugs.',
-    image: '/Shop_Images/Complete_Network_Toolkit.jpg'
+    image: '/Shop_Images/Complete_Network_Toolkit.webp'
   },
   {
     id: 'thermal-paste',
@@ -124,6 +124,6 @@ export const PRODUCTS_DATA: Product[] = [
     price: 400,
     category: 'Tools & Accessories',
     description: 'Premium CPU/GPU thermal grease compound for reducing PC overheating.',
-    image: '/Shop_Images/GD900_Thermal_Paste_Syringe.jpg'
+    image: '/Shop_Images/GD900_Thermal_Paste.webp'
   }
 ];
