@@ -17,7 +17,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
     issuer: 'University of Nairobi — KITI',
     date: 'April 22, 2026',
     category: 'AI & ML',
-    fileUrl: '/certificates/intermediate-ai-ml.pdf',
+    fileUrl: '/assets_achieved/Certificates/PDF_Certificates/AI_amp_ML_Intermediate_Certificate.pdf',
     format: 'PDF'
   },
   {
@@ -26,7 +26,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
     issuer: 'University of Nairobi — KITI',
     date: 'April 19, 2026',
     category: 'AI & ML',
-    fileUrl: '/certificates/foundation-ai-ml.pdf',
+    fileUrl: '/assets_achieved/Certificates/PDF_Certificates/AI_COMPLETION_CERTIFICATE.pdf',
     format: 'PDF'
   },
   {
@@ -35,7 +35,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
     issuer: 'University of Nairobi — KITI',
     date: 'April 24, 2026',
     category: 'Hackathons & Bootcamps',
-    fileUrl: '/certificates/blockchain-foundation.pdf',
+    fileUrl: '/assets_achieved/Certificates/PDF_Certificates/Completion_Certificate.pdf',
     format: 'PDF'
   },
   {
@@ -44,7 +44,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
     issuer: 'University of Nairobi — KITI',
     date: 'April 24, 2026',
     category: 'Cybersecurity',
-    fileUrl: '/certificates/cybersecurity-foundation.pdf',
+    fileUrl: '/assets_achieved/Certificates/PDF_Certificates/Certificate_of_Completion.pdf',
     format: 'PDF'
   },
   {
@@ -53,7 +53,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
     issuer: 'Cisco Networking Academy',
     date: 'March 17, 2026',
     category: 'Networking & IoT',
-    fileUrl: '/certificates/cisco-packet-tracer.pdf',
+    fileUrl: '/assets_achieved/Certificates/PDF_Certificates/Getting_Started_with_Cisco_Packet_Tracer_certificate_markmanoti69-gmail-com_90786363-26c5-41cc-a4a8-3ad3815c7333.pdf',
     format: 'PDF',
     verificationUrl: 'https://www.credly.com/badges/your-cisco-badge'
   },
@@ -63,7 +63,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
     issuer: 'University of Nairobi — KITI',
     date: 'April 23, 2026',
     category: 'Networking & IoT',
-    fileUrl: '/certificates/iot-foundation.pdf',
+    fileUrl: '/assets_achieved/Certificates/PDF_Certificates/IOT_-_BASIC_LEVEL_CERTIFICATE.pdf',
     format: 'PDF'
   },
   {
@@ -72,7 +72,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
     issuer: 'University of Nairobi C4D Lab / KITI',
     date: 'April 24, 2026',
     category: 'Hackathons & Bootcamps',
-    fileUrl: '/certificates/kiti-bootcamp.jpeg',
+    fileUrl: '/assets_achieved/Certificates/Image_Certificates/KITI_Bootcamp.jpeg',
     format: 'Image'
   },
   {
@@ -81,7 +81,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
     issuer: 'University of Nairobi C4D Lab / KITI',
     date: 'April 30, 2026',
     category: 'Hackathons & Bootcamps',
-    fileUrl: '/certificates/kiti-hackathon.jpeg',
+    fileUrl: '/assets_achieved/Certificates/Image_Certificates/KITI_Hackathon.jpeg',
     format: 'Image'
   }
 ];
