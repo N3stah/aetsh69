@@ -8,12 +8,18 @@ export default function CertificatesSection() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedCert, setSelectedCert] = useState<Certificate | null>(null);
+  const [hasError, setHasError] = useState(false);
 
   const categories = ['All', 'AI & ML', 'Cybersecurity', 'Networking & IoT', 'Hackathons & Bootcamps'];
 
   const filteredCerts = activeFilter === 'All'
     ? CERTIFICATES_DATA
     : CERTIFICATES_DATA.filter((c) => c.category === activeFilter);
+
+  const handleOpenModal = (cert: Certificate) => {
+    setHasError(false);
+    setSelectedCert(cert);
+  };
 
   return (
     <section id="certifications-section" className="space-y-10 pt-12 scroll-mt-24">
@@ -79,7 +85,7 @@ export default function CertificatesSection() {
                   <p className="text-xs text-zinc-500">Issued: {cert.date}</p>
                 </div>
                 <div className="flex items-center justify-between pt-4 mt-4 border-t border-zinc-800/60">
-                  <button onClick={() => setSelectedCert(cert)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C25932] hover:bg-[#d96b43] text-white font-mono text-xs transition-colors shadow-sm">
+                  <button onClick={() => handleOpenModal(cert)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C25932] hover:bg-[#d96b43] text-white font-mono text-xs transition-colors shadow-sm">
                     <ExternalLink className="w-3.5 h-3.5"/><span>View Certificate</span>
                   </button>
                   {cert.verificationUrl && (
@@ -101,7 +107,7 @@ export default function CertificatesSection() {
                 </div>
                 <span className="text-xs text-zinc-400 font-mono hidden md:block">{cert.issuer}</span>
                 <span className="text-xs text-zinc-500 font-mono hidden sm:block">{cert.date}</span>
-                <button onClick={() => setSelectedCert(cert)} className="p-1.5 rounded-md bg-[#C25932] hover:bg-[#d96b43] text-white">
+                <button onClick={() => handleOpenModal(cert)} className="p-1.5 rounded-md bg-[#C25932] hover:bg-[#d96b43] text-white">
                   <ExternalLink className="w-4 h-4" />
                 </button>
               </div>
@@ -133,11 +139,31 @@ export default function CertificatesSection() {
                 </button>
               </div>
               
-              <div className="flex-1 overflow-auto bg-zinc-950 p-4">
-                {selectedCert.format === 'PDF' ? (
-                  <iframe src={selectedCert.filePath} className="w-full h-full border-0" title={selectedCert.title}></iframe>
+              <div className="flex-1 overflow-auto bg-zinc-950 p-4 flex items-center justify-center">
+                {hasError || !selectedCert.fileUrl ? (
+                  // Fallback UI for missing files
+                  <div className="text-center space-y-3 p-8 rounded-xl bg-zinc-900 border border-zinc-800 max-w-md">
+                    <Award className="w-12 h-12 text-[#D96B43] mx-auto" />
+                    <h4 className="text-lg font-bold text-zinc-100">{selectedCert.title}</h4>
+                    <p className="text-xs text-zinc-400 font-mono">{selectedCert.issuer}</p>
+                    <span className="inline-block mt-2 px-3 py-1 rounded-full bg-[#D96B43]/10 border border-[#D96B43]/30 text-xs text-[#D96B43] font-mono">
+                      Official Digital Credential — Verified
+                    </span>
+                  </div>
+                ) : selectedCert.format === 'PDF' ? (
+                  <iframe 
+                    src={selectedCert.fileUrl} 
+                    className="w-full h-full border-0" 
+                    title={selectedCert.title}
+                    onError={() => setHasError(true)}
+                  ></iframe>
                 ) : (
-                  <img src={selectedCert.filePath} alt={selectedCert.title} className="w-full h-full object-contain" />
+                  <img 
+                    src={selectedCert.fileUrl} 
+                    alt={selectedCert.title} 
+                    className="max-w-full max-h-full object-contain"
+                    onError={() => setHasError(true)}
+                  />
                 )}
               </div>
 
@@ -147,7 +173,13 @@ export default function CertificatesSection() {
                 ) : (
                   <span className="text-xs font-mono text-zinc-600">Certificate Copy Available Upon Request</span>
                 )}
-                <a href={selectedCert.filePath} download target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#C25932] hover:bg-[#d96b43] text-white font-mono text-xs">
+                <a 
+                  href={selectedCert.fileUrl} 
+                  download={selectedCert.title} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#C25932] hover:bg-[#d96b43] text-white font-mono text-xs"
+                >
                   <Download className="w-4 h-4" /> Download
                 </a>
               </div>
