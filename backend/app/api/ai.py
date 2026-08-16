@@ -1,6 +1,7 @@
 import uuid, time, logging, random
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request
+from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
@@ -11,6 +12,9 @@ from app.api.ai_context import build_live_context, save_message, log_analytics
 from app.ai.retriever import get_retriever
 import re
 import asyncio
+import json
+import threading
+import jwt
 from google import genai
 from google.genai import types
 
@@ -93,40 +97,97 @@ async def chat(data: ChatRequest, request: Request, db: AsyncSession = Depends(g
 
     nvidia_pairs = get_nvidia_pairs()
 
-    if provider == "nvidia" and nvidia_pairs:
+    # Extract user context for personalization
+    user_context_str = "CURRENT USER CONTEXT:\n  - Status: Guest (Not logged in)"
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if token:
         try:
-            from openai import OpenAI
-            # Use the paired key and model
-            key, model = random.choice(nvidia_pairs)
-            client = OpenAI(base_url="https://integrate.api.nvidia.com/v1", api_key=key)
-            
-            live_ctx = await build_live_context(db)
+            payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+            user_id = payload.get("sub")
+            if user_id:
+                async with db.begin_nested():
+                    u_res = await db.execute(text("SELECT full_name, role FROM users WHERE id = :uid"), {"uid": user_id})
+                    u = u_res.fetchone()
+                if u:
+                    user_context_str = f"CURRENT USER CONTEXT:\n  - Name: {u.full_name or 'there'}\n  - Membership Tier: {u.role.upper()}"
+        except Exception:
+            pass
+
+    if provider == "nvidia" and nvidia_pairs:
+        from openai import OpenAI
+        key, model = random.choice(nvidia_pairs)
+        client = OpenAI(base_url="https://integrate.api.nvidia.com/v1", api_key=key)
+        
+        live_ctx = await build_live_context(db)
+        try:
+            retriever = get_retriever()
+            kb_context = retriever.get_context_for_query(data.message, top_k=3)
+        except Exception as ret_err:
+            logger.warning("Retriever failed, continuing without KB context: %s", ret_err)
+            kb_context = ""
+        enhanced_prompt = SYSTEM_PROMPT + "\n\n" + live_ctx + kb_context
+        openai_messages = [{"role": "system", "content": enhanced_prompt}] + messages
+
+        async def event_generator():
+            full_response = ""
             try:
-                retriever = get_retriever()
-                kb_context = retriever.get_context_for_query(data.message, top_k=3)
-            except Exception as ret_err:
-                logger.warning("Retriever failed, continuing without KB context: %s", ret_err)
-                kb_context = ""
-            enhanced_prompt = SYSTEM_PROMPT + "\n\n" + live_ctx + kb_context
-            openai_messages = [{"role": "system", "content": enhanced_prompt}] + messages
-            
-            start = time.monotonic()
-            logger.info("Calling NVIDIA API with model: %s", model)
-            response = await asyncio.to_thread(
-                client.chat.completions.create,
-                model=model,
-                messages=openai_messages,
-                temperature=settings.ai_temperature,
-                max_tokens=settings.ai_max_tokens,
-                stream=False
-            )
-            response_text = response.choices[0].message.content
-            tokens_used = response.usage.total_tokens if response.usage else 0
-        except Exception as e:
-            logger.error("NVIDIA API Error Details: %s", str(e))
-            response_text = "Pole sana — I'm having a connection issue right now. Please try again in a moment."
+                start = time.monotonic()
+                logger.info("Calling NVIDIA API (Streaming) with model: %s", model)
+                
+                # The OpenAI SDK call must be synchronous and run in a thread
+                # because to_thread doesn't support iterating over a stream easily.
+                # We will use a queue to pass chunks from the thread to the async generator.
+                import queue
+                q = queue.Queue()
+                SENTINEL = object()
+
+                def _stream_call():
+                    try:
+                        response = client.chat.completions.create(
+                            model=model,
+                            messages=openai_messages,
+                            temperature=settings.ai_temperature,
+                            max_tokens=settings.ai_max_tokens,
+                            stream=True
+                        )
+                        for chunk in response:
+                            if chunk.choices and chunk.choices[0].delta.content:
+                                q.put(chunk.choices[0].delta.content)
+                    except Exception as e:
+                        q.put(e)
+                    finally:
+                        q.put(SENTINEL)
+
+                # Start the thread
+                threading.Thread(target=_stream_call).start()
+
+                # Yield chunks from the queue
+                while True:
+                    item = await asyncio.to_thread(q.get)
+                    if item is SENTINEL:
+                        break
+                    if isinstance(item, Exception):
+                        raise item
+                    
+                    full_response += item
+                    yield {"data": json.dumps({"content": item})}
+
+            except Exception as e:
+                logger.error("NVIDIA API Error Details: %s", str(e))
+                error_msg = "Pole sana — I'm having a connection issue right now. Please try again in a moment."
+                full_response = error_msg
+                yield {"data": json.dumps({"content": error_msg})}
+            finally:
+                # Save messages and analytics after stream completes
+                await save_message(db, str(conv_id), "user", data.message)
+                await save_message(db, str(conv_id), "assistant", full_response)
+                await log_analytics(db, data.message, data.context or "general", provider)
+                yield {"data": json.dumps({"content": "[DONE]"})}
+
+        return EventSourceResponse(event_generator())
 
     elif provider == "gemini" and settings.gemini_api_key:
+        # Fallback to non-streaming for Gemini if needed, or implement similar stream
         try:
             client = genai.Client(api_key=settings.gemini_api_key)
             gemini_messages = []
@@ -134,7 +195,7 @@ async def chat(data: ChatRequest, request: Request, db: AsyncSession = Depends(g
                 role = "user" if msg["role"] == "user" else "model"
                 gemini_messages.append(types.Content(role=role, parts=[types.Part(text=msg["content"])]))
 
-            live_ctx = await build_live_context(db)
+            live_ctx = await build_live_context(db, user_context_str)
             try:
                 retriever = get_retriever()
                 kb_context = retriever.get_context_for_query(data.message, top_k=3)
@@ -154,20 +215,19 @@ async def chat(data: ChatRequest, request: Request, db: AsyncSession = Depends(g
                 ),
             )
             response_text = response.text
-            tokens_used = getattr(response.usage_metadata, 'total_token_count', 0) if response.usage_metadata else 0
         except Exception as e:
             logger.error("AETSH-69 Gemini call failed: %s", e)
             response_text = "Pole sana — I'm having a connection issue right now."
 
-    await save_message(db, str(conv_id), "user", data.message)
-    await save_message(db, str(conv_id), "assistant", response_text)
-    await log_analytics(db, data.message, data.context or "general", provider)
+        await save_message(db, str(conv_id), "user", data.message)
+        await save_message(db, str(conv_id), "assistant", response_text)
+        await log_analytics(db, data.message, data.context or "general", provider)
 
-    return {
-        "response": response_text,
-        "conversation_id": conv_id,
-        "tokens_used": tokens_used,
-    }
+        return {
+            "response": response_text,
+            "conversation_id": conv_id,
+            "tokens_used": 0
+        }
 
 @router.get("/status")
 async def ai_status():

@@ -9,11 +9,12 @@ from sqlalchemy import text
 
 logger = logging.getLogger(__name__)
 
-async def build_live_context(db: AsyncSession) -> str:
+async def build_live_context(db: AsyncSession, user_context: str = "CURRENT USER CONTEXT:\n  - Status: Guest (Not logged in)") -> str:
     """Fetch live platform data and return as formatted context string."""
     ctx = []
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     ctx.append(f"LIVE PLATFORM DATA (as of {now}):")
+    ctx.append(user_context)
 
     # Shop inventory
     try:
