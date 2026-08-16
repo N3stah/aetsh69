@@ -57,7 +57,6 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-
 interface ParsedAction {
   text: string;
   actionType: 'add_to_cart' | 'navigate' | null;
@@ -84,10 +83,6 @@ const ActionButton = ({ type, payload }: { type: 'add_to_cart' | 'navigate', pay
 
   const handleClick = () => {
     if (type === 'add_to_cart') {
-      // Fetch product details from the window object or just pass the ID
-      // Since we don't have full product context here, we'll just add the ID and open cart
-      // The cart will need to handle fetching product details if not present, 
-      // but for now, we'll assume the user saw the price in the chat.
       addItem({ id: payload, slug: payload, name: payload, price: 0, currency: 'KES' });
       openCart();
     } else if (type === 'navigate') {
@@ -98,7 +93,7 @@ const ActionButton = ({ type, payload }: { type: 'add_to_cart' | 'navigate', pay
   return (
     <button 
       onClick={handleClick}
-      className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rust hover:bg-rust-hover text-white font-mono text-xs transition-colors shadow-sm"
+      className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#C25932] hover:bg-[#d96b43] text-white font-mono text-xs transition-all shadow-md shadow-[#C25932]/30 hover:scale-105"
     >
       {type === 'add_to_cart' ? <ShoppingCart className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
       <span>{type === 'add_to_cart' ? 'Add to Cart' : 'View Page'}</span>
@@ -207,7 +202,6 @@ export default function AetshChatWidget() {
         const decoder = new TextDecoder();
         let assistantMessage = '';
         
-        // Add empty assistant message to fill in
         setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
         
         while (true) {
@@ -229,7 +223,6 @@ export default function AetshChatWidget() {
                 }
                 if (parsed.content) {
                   assistantMessage += parsed.content;
-                  // Update the last message (assistant) with new text
                   setMessages(prev => {
                     const newMessages = [...prev];
                     newMessages[newMessages.length - 1] = { 
@@ -254,7 +247,6 @@ export default function AetshChatWidget() {
           });
         }
       } else {
-        // Fallback for non-streaming (e.g., Gemini)
         const data = await response.json();
         setConversationId(data.conversation_id);
         setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
@@ -345,7 +337,6 @@ export default function AetshChatWidget() {
     }
   };
 
-  // Load speech synthesis voices & cleanup on unmount
   useEffect(() => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.getVoices();
@@ -395,128 +386,152 @@ export default function AetshChatWidget() {
     <>
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-rust text-ink shadow-[0_4px_16px_rgba(0,0,0,0.5)] flex items-center justify-center transition-transform duration-150 hover:scale-105 active:scale-95"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#C25932] text-white shadow-2xl shadow-black/50 flex items-center justify-center transition-transform duration-300 hover:scale-110 active:scale-95"
         aria-label="Open AETSH-69 chat"
       >
         {open ? <X size={24} /> : <MessageCircle size={24} />}
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-90 max-w-[calc(100vw-2rem)] h-130 max-h-[calc(100vh-8rem)] bg-canvas-raised border border-line-strong rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden">
+        <div className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-8rem)] rounded-[2rem] overflow-hidden shadow-2xl shadow-black/80 flex flex-col border border-white/10">
+          
+          {/* Wallpaper Background Layer */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-110"
+            style={{ backgroundImage: "url('/AETSH-69_wallpaper/Aetsh69_chat_wallpaper.jpeg')" }}
+          />
+          
+          {/* Dimming & Vignette Overlay */}
+          <div className="absolute inset-0 bg-zinc-950/85 backdrop-blur-md bg-[radial-gradient(circle_at_center,rgba(24,24,27,0.7)_0%,rgba(9,9,11,0.95)_100%)]"></div>
 
-          {/* Header */}
-          <div className="px-4 py-3 border-b border-line flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-rust-muted flex items-center justify-center">
-              <span className="text-xs font-bold text-ink">69</span>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-ink">AETSH-69</p>
-              <p className="text-xs text-ink-faint">
-                {isListening ? '🎤 Listening...' : isSpeaking ? '🔊 Speaking...' : "Mark's AI concierge"}
-              </p>
-            </div>
-            <div className="flex items-center gap-1">
-              {/* Voice mode toggle */}
-              {SpeechRecognitionClass && (
-                <button
-                  onClick={toggleVoiceMode}
-                  title={voiceMode ? 'Voice-to-voice ON — click to disable' : 'Enable voice-to-voice mode'}
-                  className={`p-1.5 rounded-md text-xs transition-colors ${voiceMode ? 'bg-rust text-ink' : 'text-ink-faint hover:text-ink'}`}
-                >
-                  🎙️
-                </button>
-              )}
-              {/* Speaker toggle */}
-              <button
-                onClick={() => { setVoiceOutputEnabled(!voiceOutputEnabled); if (isSpeaking) stopSpeaking(); }}
-                title={voiceOutputEnabled ? 'Voice output ON' : 'Voice output OFF'}
-                className={`p-1.5 rounded-md transition-colors ${voiceOutputEnabled ? 'text-rust' : 'text-ink-faint hover:text-ink'}`}
-              >
-                {voiceOutputEnabled || voiceMode ? <Volume2 size={15} /> : <VolumeX size={15} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Voice mode banner */}
-          {voiceMode && (
-            <div className="px-4 py-2 bg-rust/10 border-b border-rust/20 text-xs text-rust text-center">
-              🎙️ Voice-to-voice active — speak and AETSH-69 will reply aloud
-            </div>
-          )}
-
-          {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-            {messages.map((msg, i) => {
-              const parsed = msg.role === 'assistant' ? parseAction(msg.content) : null;
-              return (
-              <div key={i}
-                className={`max-w-[85%] px-3.5 py-2.5 rounded-md text-sm leading-relaxed ${
-                  msg.role === 'user' ? 'bg-rust text-ink ml-auto whitespace-pre-wrap' : 'bg-canvas-overlay text-ink-muted border border-line'
-                }`}>
-                {msg.role === 'assistant' && parsed ? (
-                  <>
-                    <ReactMarkdown
-                      components={{
-                        p: ({node, ...props}) => <p {...props} className="mb-2 last:mb-0" />,
-                        ul: ({node, ...props}) => <ul {...props} className="list-disc pl-4 space-y-1 mb-2" />,
-                        ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-4 space-y-1 mb-2" />,
-                        a: ({node, ...props}) => <a {...props} target="_blank" rel="noreferrer" className="text-rust underline" />,
-                        code: ({node, ...props}) => <code {...props} className="bg-zinc-950/50 text-rust px-1 rounded" />
-                      }}
-                    >
-                      {parsed.text}
-                    </ReactMarkdown>
-                    {parsed.actionType && <ActionButton type={parsed.actionType} payload={parsed.payload} />}
-                  </>
-                ) : (
-                  <span className="whitespace-pre-wrap">{msg.content}</span>
-                )}
-              </div>
-              );
-            })}
-            {loading && (
-              <div className="bg-canvas-overlay border border-line rounded-md px-3.5 py-2.5 w-fit">
-                <div className="flex gap-1 items-center">
-                  <div className="w-1.5 h-1.5 bg-rust rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-1.5 h-1.5 bg-rust rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-1.5 h-1.5 bg-rust rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          {/* Content Layer */}
+          <div className="relative z-10 flex flex-col h-full">
+            
+            {/* Glass Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-zinc-900/40 backdrop-blur-xl">
+              <div className="flex items-center gap-3">
+                <div className="relative w-8 h-8 rounded-full bg-[#D96B43]/20 border border-[#D96B43]/40 flex items-center justify-center">
+                  <span className="text-xs font-bold text-[#D96B43]">69</span>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-zinc-900"></span>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-zinc-100">AETSH-69</p>
+                  <p className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">
+                    {isListening ? 'Listening...' : isSpeaking ? 'Speaking...' : "Online"}
+                  </p>
                 </div>
               </div>
+              <div className="flex items-center gap-1">
+                {SpeechRecognitionClass && (
+                  <button
+                    onClick={toggleVoiceMode}
+                    title={voiceMode ? 'Voice-to-voice ON' : 'Enable voice mode'}
+                    className={`p-2 rounded-lg text-xs transition-colors ${voiceMode ? 'bg-[#C25932] text-white' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+                  >
+                    🎙️
+                  </button>
+                )}
+                <button
+                  onClick={() => { setVoiceOutputEnabled(!voiceOutputEnabled); if (isSpeaking) stopSpeaking(); }}
+                  title={voiceOutputEnabled ? 'Voice output ON' : 'Voice output OFF'}
+                  className={`p-2 rounded-lg transition-colors ${voiceOutputEnabled ? 'text-[#D96B43]' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+                >
+                  {voiceOutputEnabled || voiceMode ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                </button>
+                <button onClick={() => setOpen(false)} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {voiceMode && (
+              <div className="px-4 py-2 bg-[#D96B43]/10 border-b border-[#D96B43]/20 text-xs text-[#D96B43] text-center font-mono">
+                🎙️ Voice-to-voice active
+              </div>
             )}
-          </div>
 
-          {/* Input area */}
-          <div className="border-t border-line p-3 flex gap-2 items-end">
-            <textarea
-              value={displayInput}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={isListening ? '🎤 Listening — speak now...' : 'Ask AETSH-69 anything...'}
-              rows={1}
-              className={`input-field flex-1 resize-none text-sm py-2 transition-colors ${isListening ? 'border-rust/60' : ''}`}
-            />
+            {/* Messages Area */}
+            <div ref={scrollRef} className="chat-scroll flex-1 overflow-y-auto px-4 py-6 space-y-4">
+              {messages.map((msg, i) => {
+                const parsed = msg.role === 'assistant' ? parseAction(msg.content) : null;
+                return (
+                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div 
+                      className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                        msg.role === 'user' 
+                          ? 'bg-[#C25932]/90 backdrop-blur-md text-white rounded-br-sm shadow-lg shadow-[#C25932]/20' 
+                          : 'bg-zinc-900/60 backdrop-blur-md border border-white/10 text-zinc-100 rounded-bl-sm shadow-lg shadow-black/20'
+                      }`}
+                    >
+                      {msg.role === 'assistant' && parsed ? (
+                        <>
+                          <ReactMarkdown
+                            components={{
+                              p: ({node, ...props}) => <p {...props} className="mb-2 last:mb-0" />,
+                              ul: ({node, ...props}) => <ul {...props} className="list-disc pl-4 space-y-1 mb-2" />,
+                              ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-4 space-y-1 mb-2" />,
+                              a: ({node, ...props}) => <a {...props} target="_blank" rel="noreferrer" className="text-[#D96B43] underline" />,
+                              code: ({node, ...props}) => <code {...props} className="bg-black/40 text-[#D96B43] px-1 rounded" />
+                            }}
+                          >
+                            {parsed.text}
+                          </ReactMarkdown>
+                          {parsed.actionType && <ActionButton type={parsed.actionType} payload={parsed.payload} />}
+                        </>
+                      ) : (
+                        <span className="whitespace-pre-wrap">{msg.content}</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              {loading && (
+                <div className="flex justify-start">
+                  <div className="bg-zinc-900/60 backdrop-blur-md border border-white/10 rounded-2xl rounded-bl-sm px-4 py-3 shadow-lg shadow-black/20">
+                    <div className="flex gap-1.5 items-center">
+                      <div className="w-1.5 h-1.5 bg-[#D96B43] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-1.5 h-1.5 bg-[#D96B43] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-1.5 h-1.5 bg-[#D96B43] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
-            {SpeechRecognitionClass && (
-              <button
-                onClick={handleMicClick}
-                title="Voice input (Chrome/Edge only)"
-                className={`rounded-md p-2.5 transition-all duration-150 ${
-                  isListening
-                    ? 'bg-rust text-ink animate-voice-pulse'
-                    : 'bg-canvas-overlay text-ink-muted hover:text-rust border border-line'
-                }`}
-              >
-                {isListening ? <Square size={16} /> : <Mic size={16} />}
-              </button>
-            )}
+            {/* Glass Input Footer */}
+            <div className="p-4 border-t border-white/5 bg-zinc-900/40 backdrop-blur-xl">
+              <div className="flex items-end gap-2 bg-zinc-800/50 border border-white/10 rounded-2xl p-2 focus-within:border-[#D96B43]/50 transition-colors">
+                <textarea
+                  value={displayInput}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={isListening ? 'Listening...' : 'Message AETSH-69...'}
+                  rows={1}
+                  className="flex-1 bg-transparent border-0 focus:ring-0 text-zinc-100 placeholder:text-zinc-500 text-sm resize-none px-2 py-1.5 outline-none"
+                />
+                {SpeechRecognitionClass && (
+                  <button
+                    onClick={handleMicClick}
+                    title="Voice input"
+                    className={`p-2.5 rounded-xl transition-all duration-200 ${
+                      isListening
+                        ? 'bg-[#C25932] text-white animate-voice-pulse'
+                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {isListening ? <Square size={16} /> : <Mic size={16} />}
+                  </button>
+                )}
+                <button
+                  onClick={() => { stopListening(); sendMessage(); }}
+                  disabled={loading || !displayInput.trim()}
+                  className="p-2.5 rounded-xl bg-[#C25932] hover:bg-[#d96b43] text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <Send size={16} />
+                </button>
+              </div>
+            </div>
 
-            <button
-              onClick={() => { stopListening(); sendMessage(); }}
-              disabled={loading || !displayInput.trim()}
-              className="bg-rust text-ink rounded-md p-2.5 hover:bg-rust-hover transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Send size={16} />
-            </button>
           </div>
         </div>
       )}
