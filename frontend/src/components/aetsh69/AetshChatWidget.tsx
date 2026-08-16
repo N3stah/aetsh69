@@ -88,7 +88,7 @@ const ActionButton = ({ type, payload }: { type: 'add_to_cart' | 'navigate', pay
       // Since we don't have full product context here, we'll just add the ID and open cart
       // The cart will need to handle fetching product details if not present, 
       // but for now, we'll assume the user saw the price in the chat.
-      addItem({ id: payload, slug: payload, name: payload, price: 0, currency: 'KES', quantity: 1 });
+      addItem({ id: payload, slug: payload, name: payload, price: 0, currency: 'KES' });
       openCart();
     } else if (type === 'navigate') {
       navigate(payload);
