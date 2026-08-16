@@ -19,12 +19,12 @@ async def build_live_context(db: AsyncSession, user_context: str = "CURRENT USER
     # Shop inventory
     try:
         async with db.begin_nested():
-            result = await db.execute(text("SELECT p.name, p.price_kes, c.name as category, p.stock_quantity FROM products p LEFT JOIN product_categories c ON p.category_id=c.id WHERE p.stock_quantity > 0 ORDER BY p.created_at DESC LIMIT 15"))
+            result = await db.execute(text("SELECT p.name, p.slug, p.price_kes, c.name as category, p.stock_quantity FROM products p LEFT JOIN product_categories c ON p.category_id=c.id WHERE p.stock_quantity > 0 ORDER BY p.created_at DESC LIMIT 15"))
             products = result.fetchall()
         if products:
             ctx.append("\nSHOP INVENTORY (in stock):")
             for p in products:
-                ctx.append(f"  - {p.name}: KSh {p.price_kes} ({p.category}) — {p.stock_quantity} in stock")
+                ctx.append(f"  - {p.name} (Slug: {p.slug}): KSh {p.price_kes} ({p.category}) — {p.stock_quantity} in stock")
         else:
             ctx.append("\nSHOP: No products currently in stock.")
     except Exception as e:
