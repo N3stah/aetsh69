@@ -150,6 +150,8 @@ export default function AetshChatWidget() {
       
       if (response.headers.get('content-type')?.includes('text/event-stream')) {
         const reader = response.body?.getReader();
+        if (!reader) throw new Error('Stream reader not available');
+        
         const decoder = new TextDecoder();
         let assistantMessage = '';
         
