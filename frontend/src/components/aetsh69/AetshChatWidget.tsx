@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Mic, Volume2, VolumeX, Square } from 'lucide-react';
 import { aetsh69Service, type ChatMessage } from '../../services/aetsh69';
 import ReactMarkdown from 'react-markdown';
+import { useNavigate } from 'react-router-dom';
+import { useCartStore } from '../../store/cartStore';
+import { ShoppingCart, ArrowRight } from 'lucide-react';
 
 // Web Speech API TypeScript declarations
 interface SpeechRecognitionEvent extends Event {
@@ -53,6 +56,55 @@ function stripMarkdown(text: string): string {
     .replace(/\n+/g, ' ')
     .trim();
 }
+
+
+interface ParsedAction {
+  text: string;
+  actionType: 'add_to_cart' | 'navigate' | null;
+  payload: string;
+}
+
+const parseAction = (text: string): ParsedAction => {
+  const regex = /\[ACTION:(add_to_cart|navigate):([a-zA-Z0-9\-_\/:]+)\]/;
+  const match = text.match(regex);
+  if (match) {
+    return {
+      text: text.replace(regex, '').trim(),
+      actionType: match[1] as 'add_to_cart' | 'navigate',
+      payload: match[2]
+    };
+  }
+  return { text, actionType: null, payload: '' };
+};
+
+const ActionButton = ({ type, payload }: { type: 'add_to_cart' | 'navigate', payload: string }) => {
+  const addItem = useCartStore((state) => state.addItem);
+  const openCart = useCartStore((state) => state.openCart);
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (type === 'add_to_cart') {
+      // Fetch product details from the window object or just pass the ID
+      // Since we don't have full product context here, we'll just add the ID and open cart
+      // The cart will need to handle fetching product details if not present, 
+      // but for now, we'll assume the user saw the price in the chat.
+      addItem({ id: payload, slug: payload, name: payload, price: 0, currency: 'KES', quantity: 1 });
+      openCart();
+    } else if (type === 'navigate') {
+      navigate(payload);
+    }
+  };
+
+  return (
+    <button 
+      onClick={handleClick}
+      className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rust hover:bg-rust-hover text-white font-mono text-xs transition-colors shadow-sm"
+    >
+      {type === 'add_to_cart' ? <ShoppingCart className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+      <span>{type === 'add_to_cart' ? 'Add to Cart' : 'View Page'}</span>
+    </button>
+  );
+};
 
 export default function AetshChatWidget() {
   const [open, setOpen] = useState(false);
@@ -394,28 +446,34 @@ export default function AetshChatWidget() {
 
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-            {messages.map((msg, i) => (
+            {messages.map((msg, i) => {
+              const parsed = msg.role === 'assistant' ? parseAction(msg.content) : null;
+              return (
               <div key={i}
                 className={`max-w-[85%] px-3.5 py-2.5 rounded-md text-sm leading-relaxed ${
                   msg.role === 'user' ? 'bg-rust text-ink ml-auto whitespace-pre-wrap' : 'bg-canvas-overlay text-ink-muted border border-line'
                 }`}>
-                {msg.role === 'assistant' ? (
-                  <ReactMarkdown
-                    components={{
-                      p: ({node, ...props}) => <p {...props} className="mb-2 last:mb-0" />,
-                      ul: ({node, ...props}) => <ul {...props} className="list-disc pl-4 space-y-1 mb-2" />,
-                      ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-4 space-y-1 mb-2" />,
-                      a: ({node, ...props}) => <a {...props} target="_blank" rel="noreferrer" className="text-rust underline" />,
-                      code: ({node, ...props}) => <code {...props} className="bg-zinc-950/50 text-rust px-1 rounded" />
-                    }}
-                  >
-                    {msg.content}
-                  </ReactMarkdown>
+                {msg.role === 'assistant' && parsed ? (
+                  <>
+                    <ReactMarkdown
+                      components={{
+                        p: ({node, ...props}) => <p {...props} className="mb-2 last:mb-0" />,
+                        ul: ({node, ...props}) => <ul {...props} className="list-disc pl-4 space-y-1 mb-2" />,
+                        ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-4 space-y-1 mb-2" />,
+                        a: ({node, ...props}) => <a {...props} target="_blank" rel="noreferrer" className="text-rust underline" />,
+                        code: ({node, ...props}) => <code {...props} className="bg-zinc-950/50 text-rust px-1 rounded" />
+                      }}
+                    >
+                      {parsed.text}
+                    </ReactMarkdown>
+                    {parsed.actionType && <ActionButton type={parsed.actionType} payload={parsed.payload} />}
+                  </>
                 ) : (
                   <span className="whitespace-pre-wrap">{msg.content}</span>
                 )}
               </div>
-            ))}
+              );
+            })}
             {loading && (
               <div className="bg-canvas-overlay border border-line rounded-md px-3.5 py-2.5 w-fit">
                 <div className="flex gap-1 items-center">
