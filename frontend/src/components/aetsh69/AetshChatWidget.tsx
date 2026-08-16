@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Mic, Volume2, VolumeX, Square } from 'lucide-react';
 import { aetsh69Service, type ChatMessage } from '../../services/aetsh69';
+import ReactMarkdown from 'react-markdown';
 
 // Web Speech API TypeScript declarations
 interface SpeechRecognitionEvent extends Event {
@@ -393,10 +394,24 @@ export default function AetshChatWidget() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
             {messages.map((msg, i) => (
               <div key={i}
-                className={`max-w-[85%] px-3.5 py-2.5 rounded-md text-sm leading-relaxed whitespace-pre-wrap ${
-                  msg.role === 'user' ? 'bg-rust text-ink ml-auto' : 'bg-canvas-overlay text-ink-muted border border-line'
+                className={`max-w-[85%] px-3.5 py-2.5 rounded-md text-sm leading-relaxed ${
+                  msg.role === 'user' ? 'bg-rust text-ink ml-auto whitespace-pre-wrap' : 'bg-canvas-overlay text-ink-muted border border-line'
                 }`}>
-                {msg.content}
+                {msg.role === 'assistant' ? (
+                  <ReactMarkdown
+                    components={{
+                      p: ({node, ...props}) => <p {...props} className="mb-2 last:mb-0" />,
+                      ul: ({node, ...props}) => <ul {...props} className="list-disc pl-4 space-y-1 mb-2" />,
+                      ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-4 space-y-1 mb-2" />,
+                      a: ({node, ...props}) => <a {...props} target="_blank" rel="noreferrer" className="text-rust underline" />,
+                      code: ({node, ...props}) => <code {...props} className="bg-zinc-950/50 text-rust px-1 rounded" />
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
+                ) : (
+                  <span className="whitespace-pre-wrap">{msg.content}</span>
+                )}
               </div>
             ))}
             {loading && (
