@@ -1,74 +1,85 @@
 import { Link } from 'react-router-dom';
-
-const explore = [
-  { label: 'Portfolio', path: '/portfolio' },
-  { label: 'Blog', path: '/blog' },
-  { label: 'Services', path: '/services' },
-  { label: 'Shop', path: '/shop' },
-];
-
-const hobbies = [
-  { label: 'Photography', path: '/photography' },
-  { label: 'Cooking', path: '/cooking' },
-  { label: 'Arcade', path: '/arcade' },
-  { label: 'Membership', path: '/membership' },
-];
-
-const social = [
-  { label: 'GitHub', url: 'https://github.com/N3stah' },
-  { label: 'LinkedIn', url: 'https://linkedin.com/in/mark-manoti-ndege' },
-  { label: 'X / Twitter', url: 'https://x.com/Dark_ice69' },
-  { label: 'Email', url: 'mailto:aetsh69.com@gmail.com' },
-];
+import { Phone, Mail, MapPin, Github, Linkedin, Twitter } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="border-t border-line mt-auto">
+    <footer className="border-t border-zinc-800/60 bg-zinc-950/80 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-          <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="font-display font-semibold text-lg text-ink mb-3 block">
-              AETSH<span className="text-rust">-69</span>
-            </Link>
-            <p className="text-ink-muted text-sm leading-relaxed">
-              Personal tech ecosystem of Mark Manoti Ndege — software engineer, builder, and technologist based in Nairobi, Kenya.
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-10">
+          
+          {/* Brand & Contact Info */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-serif font-bold text-zinc-100">AETSH-69</h3>
+            <p className="text-sm text-zinc-400 max-w-xs leading-relaxed">
+              Personal tech ecosystem of Mark Manoti Ndege. Built with React, FastAPI, and Docker.
             </p>
+            <div className="space-y-3 pt-2">
+              <a href="tel:+254722138632" className="flex items-center gap-2.5 text-sm text-zinc-400 hover:text-[#D96B43] transition-colors group">
+                <span className="p-1.5 rounded-md bg-zinc-900 border border-zinc-800 group-hover:border-[#D96B43]/50 transition-colors">
+                  <Phone size={14} className="text-[#D96B43]" />
+                </span>
+                +254 722 138632
+              </a>
+              <a href="mailto:aetsh69.com@gmail.com" className="flex items-center gap-2.5 text-sm text-zinc-400 hover:text-[#D96B43] transition-colors group">
+                <span className="p-1.5 rounded-md bg-zinc-900 border border-zinc-800 group-hover:border-[#D96B43]/50 transition-colors">
+                  <Mail size={14} className="text-[#D96B43]" />
+                </span>
+                aetsh69.com@gmail.com
+              </a>
+              <div className="flex items-center gap-2.5 text-sm text-zinc-400">
+                <span className="p-1.5 rounded-md bg-zinc-900 border border-zinc-800">
+                  <MapPin size={14} className="text-[#D96B43]" />
+                </span>
+                Nairobi, Kenya
+              </div>
+            </div>
           </div>
+
+          {/* Quick Links */}
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <h4 className="text-xs font-mono font-semibold uppercase tracking-widest text-zinc-500 mb-4">Explore</h4>
+              <ul className="space-y-3">
+                <li><Link to="/" className="text-sm text-zinc-400 hover:text-[#D96B43] transition-colors">Home</Link></li>
+                <li><Link to="/portfolio" className="text-sm text-zinc-400 hover:text-[#D96B43] transition-colors">Portfolio</Link></li>
+                <li><Link to="/blog" className="text-sm text-zinc-400 hover:text-[#D96B43] transition-colors">Blog</Link></li>
+                <li><Link to="/shop" className="text-sm text-zinc-400 hover:text-[#D96B43] transition-colors">Shop</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-xs font-mono font-semibold uppercase tracking-widest text-zinc-500 mb-4">Connect</h4>
+              <ul className="space-y-3">
+                <li><Link to="/services" className="text-sm text-zinc-400 hover:text-[#D96B43] transition-colors">Services</Link></li>
+                <li><Link to="/hobbies" className="text-sm text-zinc-400 hover:text-[#D96B43] transition-colors">Hobbies</Link></li>
+                <li><Link to="/contact" className="text-sm text-zinc-400 hover:text-[#D96B43] transition-colors">Contact</Link></li>
+                <li><Link to="/membership" className="text-sm text-zinc-400 hover:text-[#D96B43] transition-colors">Membership</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Socials */}
           <div>
-            <p className="text-ink text-sm font-semibold mb-4">Explore</p>
-            <ul className="space-y-2">
-              {explore.map(item => (
-                <li key={item.path}>
-                  <Link to={item.path} className="text-ink-muted text-sm hover:text-ink transition-colors">{item.label}</Link>
-                </li>
-              ))}
-            </ul>
+            <h4 className="text-xs font-mono font-semibold uppercase tracking-widest text-zinc-500 mb-4">Follow</h4>
+            <div className="flex gap-3">
+              <a href="https://github.com/N3stah" target="_blank" rel="noreferrer" className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-[#D96B43]/50 transition-colors">
+                <Github size={18} />
+              </a>
+              <a href="https://www.linkedin.com/in/mark-manoti-ndege" target="_blank" rel="noreferrer" className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-[#D96B43]/50 transition-colors">
+                <Linkedin size={18} />
+              </a>
+              <a href="https://x.com/Dark_ice69" target="_blank" rel="noreferrer" className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-[#D96B43]/50 transition-colors">
+                <Twitter size={18} />
+              </a>
+            </div>
           </div>
-          <div>
-            <p className="text-ink text-sm font-semibold mb-4">Hobbies</p>
-            <ul className="space-y-2">
-              {hobbies.map(item => (
-                <li key={item.path}>
-                  <Link to={item.path} className="text-ink-muted text-sm hover:text-ink transition-colors">{item.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p className="text-ink text-sm font-semibold mb-4">Connect</p>
-            <ul className="space-y-2">
-              {social.map(item => (
-                <li key={item.label}>
-                  <a href={item.url} target="_blank" rel="noopener noreferrer"
-                    className="text-ink-muted text-sm hover:text-ink transition-colors">{item.label}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
+
         </div>
-        <div className="border-t border-line pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-ink-faint text-xs">© {new Date().getFullYear()} Mark Manoti Ndege. All rights reserved.</p>
-          <p className="text-ink-faint text-xs">Powered by <span className="text-rust">AETSH-69</span></p>
+
+        {/* Copyright */}
+        <div className="pt-8 border-t border-zinc-800/60 text-center">
+          <p className="text-xs font-mono text-zinc-600">
+            © {new Date().getFullYear()} Mark Manoti Ndege. All rights reserved. Powered by AETSH-69.
+          </p>
         </div>
       </div>
     </footer>
