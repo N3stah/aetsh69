@@ -62,13 +62,13 @@ export default function Footer() {
             <h4 className="text-xs font-mono font-semibold uppercase tracking-widest text-zinc-500 mb-4">Follow</h4>
             <div className="flex gap-3">
               <a href="https://github.com/N3stah" target="_blank" rel="noreferrer" className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-[#D96B43]/50 transition-colors">
-                <Github size={18} />
+                <Code2 size={18} />
               </a>
               <a href="https://www.linkedin.com/in/mark-manoti-ndege" target="_blank" rel="noreferrer" className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-[#D96B43]/50 transition-colors">
-                <Linkedin size={18} />
+                <Briefcase size={18} />
               </a>
               <a href="https://x.com/Dark_ice69" target="_blank" rel="noreferrer" className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-[#D96B43]/50 transition-colors">
-                <Twitter size={18} />
+                <MessageCircle size={18} />
               </a>
             </div>
           </div>
