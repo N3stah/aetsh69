@@ -104,8 +104,8 @@ async def chat(data: ChatRequest, request: Request, db: AsyncSession = Depends(g
             try:
                 retriever = get_retriever()
                 kb_context = retriever.get_context_for_query(data.message, top_k=3)
-            except Exception as re:
-                logger.warning("Retriever failed, continuing without KB context: %s", re)
+            except Exception as ret_err:
+                logger.warning("Retriever failed, continuing without KB context: %s", ret_err)
                 kb_context = ""
             enhanced_prompt = SYSTEM_PROMPT + "\n\n" + live_ctx + kb_context
             openai_messages = [{"role": "system", "content": enhanced_prompt}] + messages
@@ -138,8 +138,8 @@ async def chat(data: ChatRequest, request: Request, db: AsyncSession = Depends(g
             try:
                 retriever = get_retriever()
                 kb_context = retriever.get_context_for_query(data.message, top_k=3)
-            except Exception as re:
-                logger.warning("Retriever failed for Gemini: %s", re)
+            except Exception as ret_err:
+                logger.warning("Retriever failed for Gemini: %s", ret_err)
                 kb_context = ""
             enhanced_prompt = SYSTEM_PROMPT + "\n\n" + live_ctx + kb_context
 
