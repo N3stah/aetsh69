@@ -402,7 +402,7 @@ export default function AetshChatWidget() {
           />
           
           {/* Dimming & Vignette Overlay */}
-          <div className="absolute inset-0 bg-zinc-950/85 backdrop-blur-md bg-[radial-gradient(circle_at_center,rgba(24,24,27,0.7)_0%,rgba(9,9,11,0.95)_100%)]"></div>
+          <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm bg-[radial-gradient(circle_at_center,rgba(24,24,27,0.4)_0%,rgba(9,9,11,0.8)_100%)]"></div>
 
           {/* Content Layer */}
           <div className="relative z-10 flex flex-col h-full">
