@@ -8,6 +8,7 @@ from app.database import get_db
 from app.config import settings
 from app.core.prompts import AETSH69_SYSTEM_PROMPT
 from app.api.ai_context import build_live_context, save_message, log_analytics
+from app.ai.retriever import get_retriever
 import re
 import asyncio
 from google import genai
@@ -100,7 +101,13 @@ async def chat(data: ChatRequest, request: Request, db: AsyncSession = Depends(g
             client = OpenAI(base_url="https://integrate.api.nvidia.com/v1", api_key=key)
             
             live_ctx = await build_live_context(db)
-            enhanced_prompt = SYSTEM_PROMPT + "\n\n" + live_ctx
+            try:
+                retriever = get_retriever()
+                kb_context = retriever.get_context_for_query(data.message, top_k=3)
+            except Exception as re:
+                logger.warning("Retriever failed, continuing without KB context: %s", re)
+                kb_context = ""
+            enhanced_prompt = SYSTEM_PROMPT + "\n\n" + live_ctx + kb_context
             openai_messages = [{"role": "system", "content": enhanced_prompt}] + messages
             
             start = time.monotonic()
@@ -127,12 +134,21 @@ async def chat(data: ChatRequest, request: Request, db: AsyncSession = Depends(g
                 role = "user" if msg["role"] == "user" else "model"
                 gemini_messages.append(types.Content(role=role, parts=[types.Part(text=msg["content"])]))
 
+            live_ctx = await build_live_context(db)
+            try:
+                retriever = get_retriever()
+                kb_context = retriever.get_context_for_query(data.message, top_k=3)
+            except Exception as re:
+                logger.warning("Retriever failed for Gemini: %s", re)
+                kb_context = ""
+            enhanced_prompt = SYSTEM_PROMPT + "\n\n" + live_ctx + kb_context
+
             response = await asyncio.to_thread(
                 client.models.generate_content,
                 model=settings.gemini_model,
                 contents=gemini_messages,
                 config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
+                    system_instruction=enhanced_prompt,
                     max_output_tokens=settings.ai_max_tokens,
                     temperature=settings.ai_temperature,
                 ),

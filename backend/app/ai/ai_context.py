@@ -18,12 +18,12 @@ async def build_live_context(db: AsyncSession) -> str:
     # Shop inventory
     try:
         async with db.begin_nested():
-            result = await db.execute(text("SELECT * FROM products WHERE stock_quantity > 0 ORDER BY created_at DESC LIMIT 10"))
+            result = await db.execute(text("SELECT name, price_kes, category, stock_quantity FROM products WHERE stock_quantity > 0 ORDER BY created_at DESC LIMIT 15"))
             products = result.fetchall()
         if products:
             ctx.append("\nSHOP INVENTORY (in stock):")
             for p in products:
-                ctx.append(f"  - {p.name}: KES {p.price_kes} ({p.category or 'General'}) — {p.stock_quantity} in stock")
+                ctx.append(f"  - {p.name}: KSh {p.price_kes} ({p.category}) — {p.stock_quantity} in stock")
         else:
             ctx.append("\nSHOP: No products currently in stock.")
     except Exception as e:
@@ -32,7 +32,7 @@ async def build_live_context(db: AsyncSession) -> str:
     # Latest blog posts
     try:
         async with db.begin_nested():
-            result = await db.execute(text("SELECT * FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC LIMIT 5"))
+            result = await db.execute(text("SELECT title, excerpt, published_at FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC LIMIT 5"))
             posts = result.fetchall()
         if posts:
             ctx.append("\nLATEST BLOG POSTS:")
@@ -47,28 +47,63 @@ async def build_live_context(db: AsyncSession) -> str:
     # Portfolio projects
     try:
         async with db.begin_nested():
-            result = await db.execute(text("SELECT * FROM projects WHERE status = 'published' ORDER BY created_at DESC LIMIT 8"))
+            result = await db.execute(text("SELECT title, tagline, tech_stack FROM projects WHERE status = 'published' ORDER BY created_at DESC LIMIT 8"))
             projects = result.fetchall()
         if projects:
             ctx.append("\nPORTFOLIO PROJECTS:")
             for p in projects:
                 tech = ", ".join(p.tech_stack[:4]) if p.tech_stack else "Various"
                 ctx.append(f"  - {p.title}: {p.tagline or ''} [Stack: {tech}]")
+        else:
+            ctx.append("\nPORTFOLIO: No published projects yet.")
     except Exception as e:
         logger.warning("Could not fetch projects: %s", e)
 
     # Services
     try:
         async with db.begin_nested():
-            result = await db.execute(text("SELECT * FROM services ORDER BY created_at DESC LIMIT 8"))
+            result = await db.execute(text("SELECT name, description FROM services ORDER BY created_at DESC LIMIT 8"))
             services = result.fetchall()
         if services:
             ctx.append("\nSERVICES AVAILABLE:")
             for s in services:
-                price = f"KES {s.price_kes}" if hasattr(s, "price_kes") and s.price_kes else (f"KES {s.price}" if hasattr(s, "price") and s.price else "Contact for pricing")
-                ctx.append(f"  - {s.name}: {price}")
+                ctx.append(f"  - {s.name}: {s.description[:80] if s.description else ''}")
+        else:
+            ctx.append("\nSERVICES: No services configured yet.")
     except Exception as e:
         logger.warning("Could not fetch services: %s", e)
+
+    # Arcade games and top scores
+    try:
+        async with db.begin_nested():
+            result = await db.execute(text("SELECT name, slug FROM arcade_games WHERE is_active = true ORDER BY name"))
+            games = result.fetchall()
+        if games:
+            ctx.append("\nARCADE GAMES AVAILABLE:")
+            for g in games:
+                ctx.append(f"  - {g.name} (slug: {g.slug})")
+        else:
+            ctx.append("\nARCADE: Games include Snake, Tetris, 2048, Memory Match, Pong.")
+    except Exception as e:
+        logger.warning("Could not fetch arcade games: %s", e)
+
+    # Photography photos count
+    try:
+        async with db.begin_nested():
+            result = await db.execute(text("SELECT COUNT(*) FROM photos WHERE status = 'published'"))
+            photo_count = result.scalar()
+        ctx.append(f"\nPHOTOGRAPHY: {photo_count} published photos in the gallery.")
+    except Exception as e:
+        logger.warning("Could not fetch photos: %s", e)
+
+    # Cooking recipes count
+    try:
+        async with db.begin_nested():
+            result = await db.execute(text("SELECT COUNT(*) FROM recipes WHERE status = 'published'"))
+            recipe_count = result.scalar()
+        ctx.append(f"COOKING: {recipe_count} published recipes available.")
+    except Exception as e:
+        logger.warning("Could not fetch recipes: %s", e)
 
     # Recent contact inquiries (count only for privacy)
     try:
@@ -100,7 +135,6 @@ async def get_conversation_history(db: AsyncSession, conversation_id: str, limit
 async def save_message(db: AsyncSession, conversation_id: str, role: str, content: str, user_id: str = None):
     """Save a message to conversation history."""
     try:
-        # Use savepoint so we don't roll back the parent transaction on failure
         async with db.begin_nested():
             await db.execute(text("""
                 INSERT INTO conversation_messages (conversation_id, role, content, user_id, created_at)
@@ -114,7 +148,6 @@ async def save_message(db: AsyncSession, conversation_id: str, role: str, conten
 async def log_analytics(db: AsyncSession, question: str, context: str, provider: str):
     """Log visitor questions for analytics."""
     try:
-        # Use savepoint so we don't roll back the parent transaction on failure
         async with db.begin_nested():
             await db.execute(text("""
                 INSERT INTO ai_analytics (question, context, provider, created_at)
