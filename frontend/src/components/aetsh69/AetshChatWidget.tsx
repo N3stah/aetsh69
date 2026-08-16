@@ -145,18 +145,75 @@ export default function AetshChatWidget() {
     stopSpeaking();
 
     try {
-      const res = await aetsh69Service.chat(msg, conversationId, 'general');
-      setConversationId(res.conversation_id);
-      setMessages(prev => [...prev, { role: 'assistant', content: res.response }]);
-
-      if (fromVoice && (voiceOutputRef.current || voiceModeRef.current)) {
-        speakText(res.response, () => {
-          if (voiceModeRef.current) {
-            setTimeout(() => restartCallback?.(), 300);
+      const response = await aetsh69Service.chat(msg, conversationId, 'general');
+      
+      if (response.headers.get('content-type')?.includes('text/event-stream')) {
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let assistantMessage = '';
+        
+        // Add empty assistant message to fill in
+        setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data:')) {
+              const dataStr = line.slice(5).trim();
+              if (dataStr === '[DONE]') continue;
+              
+              try {
+                const parsed = JSON.parse(dataStr);
+                if (parsed.conversation_id) {
+                  setConversationId(parsed.conversation_id);
+                }
+                if (parsed.content) {
+                  assistantMessage += parsed.content;
+                  // Update the last message (assistant) with new text
+                  setMessages(prev => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1] = { 
+                      role: 'assistant', 
+                      content: assistantMessage 
+                    };
+                    return newMessages;
+                  });
+                }
+              } catch (e) {
+                console.error('Parse error:', e);
+              }
+            }
           }
-        });
+        }
+
+        if (fromVoice && (voiceOutputRef.current || voiceModeRef.current)) {
+          speakText(assistantMessage, () => {
+            if (voiceModeRef.current) {
+              setTimeout(() => restartCallback?.(), 300);
+            }
+          });
+        }
+      } else {
+        // Fallback for non-streaming (e.g., Gemini)
+        const data = await response.json();
+        setConversationId(data.conversation_id);
+        setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+
+        if (fromVoice && (voiceOutputRef.current || voiceModeRef.current)) {
+          speakText(data.response, () => {
+            if (voiceModeRef.current) {
+              setTimeout(() => restartCallback?.(), 300);
+            }
+          });
+        }
       }
-    } catch {
+    } catch (err) {
+      console.error('Chat error:', err);
       setMessages(prev => [...prev, { role: 'assistant', content: 'Pole sana — connection issue. Please try again.' }]);
     } finally {
       setLoading(false);
