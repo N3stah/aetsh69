@@ -10,6 +10,7 @@ from app.config import settings
 from app.core.prompts import AETSH69_SYSTEM_PROMPT
 from app.api.ai_context import build_live_context, save_message, log_analytics
 from app.ai.retriever import get_retriever
+from app.utils.limiter import rate_limiter
 import re
 import asyncio
 import json
@@ -60,7 +61,7 @@ def get_nvidia_pairs() -> list:
     return pairs
 
 @router.post("/chat")
-async def chat(data: ChatRequest, request: Request, db: AsyncSession = Depends(get_db)):
+async def chat(data: ChatRequest, request: Request, db: AsyncSession = Depends(get_db), limiter: None = Depends(rate_limiter(limit=15, window=86400))):
     for pattern in INJECTION_PATTERNS:
         if re.search(pattern, data.message, re.IGNORECASE):
             raise HTTPException(status_code=400, detail="Siwezi kufanya hivyo. I can't process that — please ask me something about Mark or his platform.")

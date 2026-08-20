@@ -105,7 +105,7 @@ async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
     return {"id": str(user_id), "email": data.email, "message": "Registration successful"}
 
 @router.post("/login", response_model=TokenResponse)
-async def login(data: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
+async def login(data: LoginRequest, request: Request, db: AsyncSession = Depends(get_db), limiter: None = Depends(rate_limiter(limit=5, window=60))):
     result = await db.execute(
         text("SELECT id, hashed_password, role, is_active, login_attempts, locked_until FROM users WHERE email = :e"),
         {"e": data.email}
