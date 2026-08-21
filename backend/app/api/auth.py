@@ -90,7 +90,7 @@ class ResetPasswordRequest(BaseModel):
 
 # ---------- Endpoints ----------
 @router.post("/register", status_code=201)
-async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
+async def register(data: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db), limiter: None = Depends(rate_limiter(limit=5, window=60))):
     existing = await db.execute(text("SELECT id FROM users WHERE email = :e"), {"e": data.email})
     if existing.scalar():
         raise HTTPException(status_code=409, detail="Email already registered")
