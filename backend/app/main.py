@@ -28,6 +28,7 @@ from app.api.contact import router as contact_router
 from app.api.payments import router as payments_router
 from app.api.admin import router as admin_router
 from app.api.search import router as search_router
+from app.api.portfolio_pdf import router as portfolio_pdf_router
 from app.api.media import router as media_router
 
 logger = logging.getLogger(__name__)
