@@ -1,31 +1,46 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.utils.storage import upload_file_to_cloudinary
+from fastapi import APIRouter, Depends, HTTPException, Request
+from app.utils.security import get_user_id_from_token
+import cloudinary
+import os
+import time
 import logging
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-@router.post("/upload")
-async def upload_media(file: UploadFile = File(...)):
-    """
-    Upload an image/file to Cloudinary cloud storage.
-    Returns the public URL of the uploaded file.
-    """
-    if not file.content_type or not file.content_type.startswith('image/'):
-        raise HTTPException(status_code=400, detail="Only image files are allowed.")
+# Configure Cloudinary
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secure=True
+)
 
-    # Limit file size to 10MB
-    contents = await file.read()
-    if len(contents) > 10 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="File size exceeds 10MB limit.")
-
+@router.get("/sign-upload")
+async def sign_upload(request: Request):
+    """
+    Generates a secure signature for direct-to-Cloudinary uploads.
+    Requires authentication.
+    """
+    user_id = get_user_id_from_token(request) # Ensures only logged-in users can upload
+    
+    timestamp = int(time.time())
+    folder = "aetsh69_media"
+    
     try:
-        public_url = upload_file_to_cloudinary(
-            file_bytes=contents,
-            file_name=file.filename or "upload.jpg",
-            content_type=file.content_type
+        params_to_sign = {"timestamp": timestamp, "folder": folder}
+        signature = cloudinary.utils.api_sign_request(
+            params_to_sign, 
+            os.getenv("CLOUDINARY_API_SECRET")
         )
-        return {"url": public_url, "filename": file.filename}
+        
+        return {
+            "signature": signature,
+            "timestamp": timestamp,
+            "api_key": os.getenv("CLOUDINARY_API_KEY"),
+            "cloud_name": os.getenv("CLOUDINARY_CLOUD_NAME"),
+            "folder": folder
+        }
     except Exception as e:
-        logger.error(f"Media upload failed: {e}")
-        raise HTTPException(status_code=500, detail="Could not upload file to cloud storage.")
+        logger.error(f"Failed to sign upload: {e}")
+        raise HTTPException(status_code=500, detail="Could not sign upload.")
