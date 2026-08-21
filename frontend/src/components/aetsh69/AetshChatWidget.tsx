@@ -467,6 +467,7 @@ export default function AetshChatWidget() {
                       {msg.role === 'assistant' && parsed ? (
                         <>
                           <ReactMarkdown
+                    rehypePlugins={[[rehypeSanitize]]}
                             components={{
                               p: ({node, ...props}) => <p {...props} className="mb-2 last:mb-0" />,
                               ul: ({node, ...props}) => <ul {...props} className="list-disc pl-4 space-y-1 mb-2" />,

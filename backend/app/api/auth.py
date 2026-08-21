@@ -182,6 +182,7 @@ async def logout(data: RefreshRequest, db: AsyncSession = Depends(get_db)):
 
 @router.get("/me")
 async def me(user_id: str = Depends(get_user_id_from_token), db: AsyncSession = Depends(get_secure_db)):
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
 async def me(user_id: str = Depends(get_user_id_from_token), db: AsyncSession = Depends(get_secure_db)):
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
     if not token:
