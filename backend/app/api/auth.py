@@ -14,7 +14,7 @@ from email.mime.multipart import MIMEMultipart
 
 from app.database import get_db, get_secure_db
 from app.utils.limiter import rate_limiter
-from app.utils.security import get_user_id_from_token, get_secure_db
+from app.utils.security import get_user_id_from_token
 from app.models import User
 from app.config import settings
 from app.utils.email import send_password_reset_email
