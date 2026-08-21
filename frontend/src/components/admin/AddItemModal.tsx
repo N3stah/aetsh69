@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, Loader2 } from 'lucide-react';
-import api from '../../services/api';
+import api, { mediaService } from '../../services/api';
 
 interface Field {
   name: string;
@@ -32,12 +32,9 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onS
   const handleFileUpload = async (name: string, file: File) => {
     setIsUploading(name);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const response = await api.post('/media/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      handleChange(name, response.data.url);
+      // Use the secure Cloudinary signed upload service
+      const url = await mediaService.uploadFile(file);
+      handleChange(name, url);
     } catch (error) {
       console.error('Upload failed:', error);
       alert('Image upload failed. Please try again.');
