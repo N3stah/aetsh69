@@ -13,6 +13,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from app.database import get_db, get_secure_db
+from app.utils.limiter import rate_limiter
+from app.utils.security import get_user_id_from_token, get_secure_db
 from app.models import User
 from app.config import settings
 from app.utils.email import send_password_reset_email
@@ -180,7 +182,7 @@ async def logout(data: RefreshRequest, db: AsyncSession = Depends(get_db)):
 
 @router.get("/me")
 async def me(user_id: str = Depends(get_user_id_from_token), db: AsyncSession = Depends(get_secure_db)):
-async def me(request: Request, db: AsyncSession = Depends(get_db)):
+async def me(user_id: str = Depends(get_user_id_from_token), db: AsyncSession = Depends(get_secure_db)):
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
