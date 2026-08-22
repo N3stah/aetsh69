@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { arcadeService, LeaderboardEntry } from '../../services/arcade';
+import { arcadeService } from '../../services/arcade';
+import type { LeaderboardEntry } from '../../services/arcade';
 import { Trophy } from 'lucide-react';
 
 export default function Leaderboard({ game }: { game: string }) {

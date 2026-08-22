@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, Loader2 } from 'lucide-react';
-import api, { mediaService } from '../../services/api';
+import { mediaService } from '../../services/api';
 
 interface Field {
   name: string;

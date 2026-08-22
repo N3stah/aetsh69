@@ -26,7 +26,7 @@ export default function VerifyEmailPage() {
       .then(() => {
         setStatus('success');
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         setStatus('error');
         setMessage(err.response?.data?.detail || 'Verification failed.');
       });
