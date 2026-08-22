@@ -76,7 +76,7 @@ api.interceptors.response.use(
   }
 );
 
-export default api;import api from './api';
+export default api;
 
 export const mediaService = {
   async getUploadSignature() {

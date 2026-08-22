@@ -26,9 +26,9 @@ export default function VerifyEmailPage() {
       .then(() => {
         setStatus('success');
       })
-      .catch((err: unknown) => {
+      .catch((err: any) => {
         setStatus('error');
-        setMessage(err.response?.data?.detail || 'Verification failed.');
+        setMessage(err?.response?.data?.detail || 'Verification failed.');
       });
       
   // 2. Add 'token' to the dependency array to satisfy ESLint
