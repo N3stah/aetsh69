@@ -76,4 +76,32 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default api;import api from './api';
+
+export const mediaService = {
+  async getUploadSignature() {
+    const { data } = await api.get('/media/sign-upload');
+    return data;
+  },
+
+  async uploadFile(file: File) {
+    const sig = await this.getUploadSignature();
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('signature', sig.signature);
+    formData.append('timestamp', sig.timestamp);
+    formData.append('api_key', sig.api_key);
+    formData.append('folder', sig.folder);
+
+    // Upload directly to Cloudinary, bypassing the Render backend entirely
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloud_name}/auto/upload`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) throw new Error('Upload failed');
+    const data = await response.json();
+    return data.secure_url; // Return the public URL of the uploaded image
+  }
+};
