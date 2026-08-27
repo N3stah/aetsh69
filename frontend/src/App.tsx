@@ -1,4 +1,3 @@
-import JudyPage from './pages/JudyPage';
 import { Routes, Route } from 'react-router-dom'
 const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/auth/ResetPasswordPage"));
@@ -86,9 +85,7 @@ export default function App() {
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
               <Route path="/verify-email" element={<VerifyEmailPage />} />
-              <Route path="/Judy" element={<JudyPage />} />
-  <Route path="/judy" element={<JudyPage />} />
-</Routes>
+            </Routes>
           </Suspense>
           </ErrorBoundary>
         </main>
