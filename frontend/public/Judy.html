@@ -1081,5 +1081,139 @@ let chocBusy=false;
 })();
 </script>
 
+
+<!-- ======== AETSH-69 STANDARD LAYOUT & CHAT WIDGET ======== -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  /* Ensure the injected header/footer don't conflict with Judy's styles */
+  .aetsh-header { position: sticky; top: 0; z-index: 1000; background: #161614; border-bottom: 1px solid #333; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; font-family: 'Montserrat', sans-serif; }
+  .aetsh-header nav { display: flex; gap: 1.5rem; align-items: center; }
+  .aetsh-header a { color: #B3AFA6; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+  .aetsh-header a:hover { color: #F2EFE9; }
+  .aetsh-header .logo { color: #F2EFE9; font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .aetsh-footer { background: #09090b; border-top: 1px solid #333; padding: 2rem 1.5rem; text-align: center; color: #6E6A62; font-family: 'Montserrat', sans-serif; font-size: 0.8rem; }
+  .aetsh-footer .brand { color: #F2EFE9; font-weight: 700; margin-bottom: 0.5rem; }
+  .aetsh-footer .contact { margin-top: 0.5rem; color: #B3AFA6; }
+  
+  /* AETSH-69 Chat Widget Styles */
+  #aetsh-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; font-family: 'Montserrat', sans-serif; }
+  #aetsh-window { display: none; flex-direction: column; position: absolute; bottom: 70px; right: 0; width: 340px; height: 480px; background: #161614; border-radius: 16px; overflow: hidden; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  #aetsh-header { background: #1C1C19; padding: 12px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #333; }
+  #aetsh-header .avatar { width: 32px; height: 32px; background: #C25932; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; }
+  #aetsh-header .title { color: #F2EFE9; font-weight: 700; font-size: 14px; }
+  #aetsh-header .subtitle { color: #6E6A62; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+  #aetsh-header .close-btn { margin-left: auto; background: none; border: none; color: #6E6A62; cursor: pointer; font-size: 16px; }
+  #aetsh-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 20px 20px; }
+  .msg-user { align-self: flex-end; background: #C25932; color: white; padding: 10px 14px; border-radius: 12px 12px 4px 12px; max-width: 85%; font-size: 13px; line-height: 1.4; }
+  .msg-ai { align-self: flex-start; background: #232320; color: #F2EFE9; padding: 10px 14px; border-radius: 12px 12px 12px 4px; max-width: 85%; font-size: 13px; line-height: 1.4; }
+  #aetsh-input-area { padding: 12px; border-top: 1px solid #333; display: flex; gap: 8px; }
+  #aetsh-input { flex: 1; background: #232320; border: 1px solid #333; color: #F2EFE9; border-radius: 8px; padding: 10px; font-size: 13px; outline: none; }
+  #aetsh-send { background: #C25932; color: white; border: none; border-radius: 8px; padding: 0 16px; cursor: pointer; }
+  #aetsh-toggle { background: #C25932; color: white; border: none; border-radius: 50%; width: 60px; height: 60px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 20px; display: flex; align-items: center; justify-content: center; }
+  .wa-btn { position: fixed; bottom: 24px; left: 24px; z-index: 9998; background: #25D366; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+</style>
+
+<!-- Header -->
+<header class="aetsh-header">
+  <div class="logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C25932" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    AETSH-69
+  </div>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/portfolio">Portfolio</a>
+    <a href="/blog">Blog</a>
+    <a href="/services">Services</a>
+    <a href="/shop">Shop</a>
+    <a href="/hobbies">Hobbies</a>
+    <a href="/membership">Membership</a>
+    <a href="/login">Sign in</a>
+  </nav>
+</header>
+
+<!-- WhatsApp Button -->
+<a href="https://wa.me/254722138632?text=Cheers%20to%20being%2021!%20🥂" target="_blank" class="wa-btn">
+  <i class="fa-brands fa-whatsapp" style="font-size: 32px;"></i>
+</a>
+
+<!-- AETSH-69 Chat Widget -->
+<div id="aetsh-container">
+  <div id="aetsh-window">
+    <div id="aetsh-header">
+      <div class="avatar">69</div>
+      <div>
+        <div class="title">AETSH-69</div>
+        <div class="subtitle">AI Concierge</div>
+      </div>
+      <button class="close-btn" onclick="document.getElementById('aetsh-window').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="aetsh-messages">
+      <div class="msg-ai">Hey Judy, welcome to your page! Cheers to being 21! 🥂</div>
+    </div>
+    <div id="aetsh-input-area">
+      <input type="text" id="aetsh-input" placeholder="Message AETSH-69...">
+      <button id="aetsh-send"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+  <button id="aetsh-toggle" onclick="document.getElementById('aetsh-window').style.display='flex'"><i class="fa-solid fa-comment-dots"></i></button>
+</div>
+
+<!-- Footer -->
+<footer class="aetsh-footer">
+  <div class="brand">AETSH-69</div>
+  <div>Personal tech ecosystem of Mark Manoti Ndege. Built with React, FastAPI, and Docker.</div>
+  <div class="contact">+254 722 138632 · aetsh69.com@gmail.com · Nairobi, Kenya</div>
+  <div style="margin-top: 1rem; font-size: 0.7rem; color: #4A4640;">© 2026 Mark Manoti Ndege. All rights reserved. Powered by AETSH-69.</div>
+</footer>
+
+<script>
+(function() {
+  const sendBtn = document.getElementById('aetsh-send');
+  const inputEl = document.getElementById('aetsh-input');
+  const messagesEl = document.getElementById('aetsh-messages');
+  
+  const API_URL = 'https://aetsh69-backend.onrender.com/api/aetsh69/chat';
+  
+  async function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+    
+    const userMsg = document.createElement('div');
+    userMsg.className = 'msg-user';
+    userMsg.textContent = text;
+    messagesEl.appendChild(userMsg);
+    
+    inputEl.value = '';
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    
+    const aiMsg = document.createElement('div');
+    aiMsg.className = 'msg-ai';
+    aiMsg.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Thinking...';
+    messagesEl.appendChild(aiMsg);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, context: 'general' })
+      });
+      
+      const data = await response.json();
+      aiMsg.textContent = data.response;
+    } catch (error) {
+      aiMsg.textContent = 'Pole sana — connection issue. Please try again.';
+    }
+    
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+  
+  sendBtn.addEventListener('click', sendMessage);
+  inputEl.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+})();
+</script>
+
 </body>
 </html>
