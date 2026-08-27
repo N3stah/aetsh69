@@ -106,7 +106,9 @@ export default function AetshChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([{
     role: 'assistant',
-    content: "Habari! Mimi ni AETSH-69 — Mark's AI concierge. Ask me about Mark's projects, services, shop, or anything on this site. You can also use the 🎤 mic to talk to me!",
+    content: window.location.pathname.toLowerCase().includes('/judy') 
+      ? "Hey Judy, welcome to your page! Cheers to being 21! 🥂" 
+      : "Habari! Mimi ni AETSH-69 — Mark's AI concierge. Ask me about Mark's projects, services, shop, or anything on this site. You can also use the 🎤 mic to talk to me!",
   }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
