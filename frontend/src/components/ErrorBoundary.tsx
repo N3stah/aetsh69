@@ -1,27 +1,27 @@
-import { Component, type ReactNode } from 'react';
+import React from 'react';
 
-interface Props { children: ReactNode; fallback?: ReactNode; }
-interface State { hasError: boolean; error?: Error; }
+interface State { hasError: boolean; }
 
-export default class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, State> {
+  constructor(props: any) {
     super(props);
     this.state = { hasError: false };
   }
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true };
   }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("Caught by ErrorBoundary:", error, errorInfo);
+  }
+
   render() {
     if (this.state.hasError) {
-      return this.props.fallback || (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center px-6 text-center">
-          <p className="text-rust font-mono text-sm mb-2">Error</p>
-          <h2 className="font-display text-2xl font-semibold text-ink mb-2">Something went wrong</h2>
-          <p className="text-ink-muted text-sm mb-6">{this.state.error?.message || 'An unexpected error occurred.'}</p>
-          <button onClick={() => window.location.reload()} className="btn-secondary text-sm">Reload page</button>
-        </div>
-      );
+      return null; // Render nothing if it crashes, so the rest of the site stays up
     }
     return this.props.children;
   }
 }
+
+export default ErrorBoundary;

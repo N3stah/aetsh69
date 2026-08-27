@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import AetshChatWidget from '../components/aetsh69/AetshChatWidget';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function MainLayout() {
   return (
@@ -11,7 +12,7 @@ export default function MainLayout() {
         <Outlet />
       </main>
       <Footer />
-      <AetshChatWidget />
+      <ErrorBoundary><AetshChatWidget /></ErrorBoundary>
       
       {/* WhatsApp Floating Button */}
       <a 
