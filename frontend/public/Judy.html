@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patient Chart №JD-2105 — Judy Turns 21</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+/* ============================================================
+   DESIGN TOKENS — medical white / teal / royal / crimson system
+   ============================================================ */
+:root{
+  --paper:#F6F7F5;
+  --card:#FFFFFF;
+  --ink:#13273D;
+  --ink-soft:#2C4560;
+  --mut:#5C6C79;
+  --teal:#0E7C86;
+  --teal-deep:#0A5259;
+  --royal:#1D3E93;
+  --crimson:#C8102E;
+  --crimson-deep:#8E0E23;
+  --crimson-lite:#FF5A73;
+  --mint:#DEF1EB;
+  --cream:#FFF8E7;
+  --line:#DFE7E7;
+  --ok:#12805C;
+  --amber:#A96A00;
+  --monitor:#0A1722;
+  --trace:#3BE3A8;
+  --shadow-1:0 1px 2px rgba(19,39,61,.05),0 6px 24px rgba(19,39,61,.06);
+  --shadow-2:0 2px 6px rgba(19,39,61,.08),0 18px 44px rgba(19,39,61,.12);
+  --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Montserrat',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.6;
+  overflow-x:hidden;
+  background-image:
+    linear-gradient(rgba(14,124,134,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(14,124,134,.045) 1px,transparent 1px);
+  background-size:52px 52px;
+}
+img,svg{display:block;max-width:100%}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--royal);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1120px;margin-inline:auto;padding-inline:clamp(1.1rem,4vw,2.4rem)}
+main,footer{position:relative;z-index:2}
+
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--teal);z-index:200}
+
+/* ============================================================
+   BACKGROUND · WALKING CAT PARADE (strictly decorative)
+   ============================================================ */
+.parade{position:fixed;left:0;right:0;bottom:0;height:96px;z-index:1;pointer-events:none;overflow:hidden}
+.walker{position:absolute;bottom:10px;left:-160px;opacity:.15;animation:walkAcross var(--d,32s) linear infinite;animation-delay:var(--del,0s)}
+@keyframes walkAcross{to{transform:translateX(calc(100vw + 380px))}}
+.walker .bob{display:block;animation:walkBob .62s ease-in-out infinite alternate}
+@keyframes walkBob{from{transform:translateY(0)}to{transform:translateY(-3.5px)}}
+.walker svg{width:var(--sz,54px);height:auto;display:block}
+.gait{transform-origin:center top;animation:gaitSwing .62s ease-in-out infinite alternate}
+.gait.b{animation-delay:-.31s}
+@keyframes gaitSwing{from{transform:rotate(-21deg)}to{transform:rotate(21deg)}}
+.tailSway{transform-origin:14px 46px;animation:tailSway 1.4s ease-in-out infinite alternate}
+@keyframes tailSway{from{transform:rotate(-5deg)}to{transform:rotate(6deg)}}
+
+/* ============================================================
+   BACKGROUND · DRIFTING ROMANCE NOVELS
+   ============================================================ */
+#novelLayer{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.novel{position:absolute;top:-14vh;opacity:var(--op,.07);animation:novelFall var(--dur,26s) linear infinite;animation-delay:var(--del,0s)}
+.novel .sway{display:block;animation:novelSway var(--sdur,5.5s) ease-in-out infinite alternate}
+@keyframes novelFall{to{transform:translateY(125vh)}}
+@keyframes novelSway{from{transform:translateX(-12px) rotate(-8deg)}to{transform:translateX(12px) rotate(8deg)}}
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.top{position:sticky;top:0;z-index:90;background:rgba(246,247,245,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-block:.7rem}
+.brand{display:flex;align-items:center;gap:.65rem;font-weight:800;font-size:.82rem;letter-spacing:.06em}
+.brand .cross{width:26px;height:26px;background:var(--teal);color:#fff;display:grid;place-items:center;border-radius:7px;font-size:.8rem}
+.brand small{display:block;font-weight:600;color:var(--mut);letter-spacing:.14em;font-size:.6rem}
+.top-meta{font-size:.62rem;font-weight:700;letter-spacing:.16em;color:var(--mut);text-align:right;white-space:nowrap}
+@media(max-width:560px){.top-meta span.opt{display:none}}
+
+/* ============================================================
+   SECTION PRIMITIVES
+   ============================================================ */
+section{padding-block:clamp(3.4rem,9vw,6rem)}
+.eyebrow{display:inline-flex;align-items:center;gap:.55rem;font-size:.68rem;font-weight:800;letter-spacing:.2em;color:var(--teal);text-transform:uppercase;margin-bottom:1rem}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--teal)}
+.sec-title{font-size:clamp(1.7rem,3.6vw,2.5rem);font-weight:800;line-height:1.15;letter-spacing:-.01em;margin-bottom:.6rem}
+.sec-sub{color:var(--mut);max-width:56ch;font-size:.95rem}
+
+.reveal{opacity:0;transform:translateY(26px)}
+.reveal.in{opacity:1;transform:none;transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+
+/* ============================================================
+   01 · CHECK-UP HERO
+   ============================================================ */
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(2rem,5vw,4rem);align-items:center}
+.chart-label{font-size:.72rem;font-weight:800;letter-spacing:.22em;color:var(--mut);text-transform:uppercase}
+.name-judy{
+  font-size:clamp(4.4rem,17vw,12.5rem);
+  font-weight:900;line-height:.92;letter-spacing:-.025em;
+  color:var(--crimson);margin:.15em 0 .1em;position:relative;width:fit-content;
+}
+.name-judy::after{
+  content:"";position:absolute;left:.02em;right:.04em;bottom:.02em;height:.06em;
+  background:var(--crimson);transform-origin:left;transform:scaleX(0);
+  animation:underlineIn 1s cubic-bezier(.2,.8,.2,1) .6s forwards;border-radius:3px;
+}
+@keyframes underlineIn{to{transform:scaleX(1)}}
+.akad{color:var(--mut);font-weight:600;font-size:clamp(.85rem,1.6vw,1rem);letter-spacing:.02em;margin-bottom:1.6rem}
+.diag{display:flex;flex-direction:column;gap:.35rem;border-left:4px solid var(--teal);padding-left:1rem;max-width:34rem}
+.diag .lbl{font-size:.66rem;font-weight:800;letter-spacing:.2em;color:var(--teal);text-transform:uppercase}
+.diag .val{font-size:clamp(1.15rem,2.6vw,1.6rem);font-weight:800;line-height:1.3}
+.diag .val em{font-style:normal;background:linear-gradient(transparent 58%,var(--mint) 58%);padding-inline:.1em}
+.diag .note{font-family:'Caveat',cursive;color:var(--teal-deep);font-size:1.15rem;margin-top:.2rem}
+
+.ecg-strip{margin-top:clamp(2.2rem,5vw,3.4rem)}
+.ecg-strip svg{width:100%;height:56px}
+.ecg-base{fill:none;stroke:var(--teal);stroke-width:2.2;opacity:.16;stroke-linecap:round;stroke-linejoin:round}
+.ecg-run{fill:none;stroke:var(--teal);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:110 490;animation:ecgRun 3.4s linear infinite}
+@keyframes ecgRun{from{stroke-dashoffset:600}to{stroke-dashoffset:0}}
+
+.cue{display:flex;align-items:center;gap:.7rem;justify-content:center;margin-top:1.6rem;color:var(--teal);font-size:.68rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase}
+.cue i{animation:bob 1.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+.chart-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow-2);padding:1.6rem 1.5rem 1.3rem;position:relative;
+  transform:rotate(-1.4deg);max-width:420px;justify-self:end;width:100%;
+}
+.chart-card::before{
+  content:"";position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  width:96px;height:20px;border-radius:6px 6px 0 0;
+  background:linear-gradient(#C6D2D6,#9FB3BB 55%,#7E939C);
+  border:1px solid #7E939C;border-bottom:none;
+}
+.cc-head{display:flex;gap:1rem;align-items:center;border-bottom:2px solid var(--ink);padding-bottom:.9rem;margin-bottom:.9rem}
+.avatar-badge{width:92px;height:92px;flex:none}
+.cc-head h3{font-size:1.05rem;font-weight:800;line-height:1.25}
+.cc-head p{font-size:.68rem;letter-spacing:.14em;color:var(--teal);font-weight:800;text-transform:uppercase;margin-top:.15rem}
+.chart-rows{display:flex;flex-direction:column;gap:.55rem;font-size:.78rem}
+.chart-rows .row{display:flex;align-items:baseline;gap:.6rem}
+.chart-rows .k{font-weight:800;font-size:.62rem;letter-spacing:.14em;color:var(--mut);text-transform:uppercase}
+.chart-rows .lead{flex:1;border-bottom:2px dotted var(--line);transform:translateY(-3px)}
+.chart-rows .v{font-weight:700;text-align:right}
+.barcode{margin-top:1.1rem;height:26px;border-radius:3px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 10px,var(--ink) 10px 13px,transparent 13px 16px);opacity:.85}
+
+/* ============================================================
+   02 · THE PULSE — interactive timeline
+   ============================================================ */
+.tl-head{text-align:center;max-width:640px;margin-inline:auto}
+.tl-wrap{position:relative;margin-top:3.2rem;padding-block:.5rem}
+.rail{position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);
+  background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='96'%3E%3Cpath d='M15 0v22l-8 10 14 22 6-32-12 18v56' fill='none' stroke='%230E7C86' stroke-opacity='.4' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") repeat-y center top}
+.rail-fill{position:absolute;left:0;top:0;width:2px;height:0;background:var(--teal)}
+.tl-item{display:grid;grid-template-columns:1fr 90px 1fr;align-items:center;min-height:150px}
+.tl-node{grid-column:2;justify-self:center;position:relative;z-index:2}
+.tl-node .dot{width:18px;height:18px;border-radius:50%;background:var(--paper);border:4px solid var(--teal);box-shadow:0 0 0 4px var(--paper)}
+.tl-node::before{content:"";position:absolute;inset:-12px;border-radius:50%;border:2px solid var(--teal);opacity:0;animation:halo 2.6s ease-out infinite}
+@keyframes halo{0%{transform:scale(.6);opacity:.55}70%{transform:scale(1.25);opacity:0}100%{opacity:0}}
+.tl-body{max-width:430px}
+.tl-item:nth-child(odd) .tl-body{grid-column:1;grid-row:1;justify-self:end}
+.tl-item:nth-child(even) .tl-body{grid-column:3;grid-row:1;justify-self:start}
+.tl-era{display:inline-flex;align-items:center;gap:.5rem;font-size:.62rem;font-weight:800;letter-spacing:.18em;color:var(--teal);text-transform:uppercase;background:var(--mint);padding:.28rem .6rem;border-radius:999px;margin-bottom:.55rem}
+.tl-body h3{font-size:clamp(1.15rem,2.2vw,1.45rem);font-weight:800;margin-bottom:.35rem}
+.tl-body p{color:var(--ink-soft);font-size:.92rem}
+.note-toggle{margin-top:.5rem;background:none;border:none;color:var(--teal);font-weight:800;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;display:inline-flex;align-items:center;gap:.4rem;padding:.2rem 0}
+.note-toggle i{transition:transform .3s}
+.tl-item.open .note-toggle i{transform:rotate(45deg)}
+.chart-note{max-height:0;overflow:hidden;transition:max-height .45s ease,opacity .4s ease,margin .45s ease;opacity:0;margin-top:0}
+.tl-item.open .chart-note{max-height:140px;opacity:1;margin-top:.55rem}
+.chart-note p{font-family:'Caveat',cursive;font-size:1.18rem;color:var(--teal-deep);border-left:3px solid var(--teal);padding-left:.8rem}
+
+@media(max-width:760px){
+  .hero-grid{grid-template-columns:1fr}
+  .chart-card{justify-self:start;transform:rotate(-.8deg);max-width:none}
+  .rail,.tl-node{left:14px !important}
+  .rail{transform:none}
+  .tl-item{grid-template-columns:56px 1fr;min-height:0;padding-block:1.1rem}
+  .tl-node{grid-column:1;justify-self:start;align-self:start;margin-top:.3rem}
+  .tl-item:nth-child(odd) .tl-body,.tl-item:nth-child(even) .tl-body{grid-column:2;grid-row:auto;justify-self:start}
+}
+
+/* ============================================================
+   03 · VITAL SIGNS
+   ============================================================ */
+.monitor{background:var(--monitor);border-radius:18px;overflow:hidden;box-shadow:var(--shadow-2);border:1px solid #14283C;color:#EAF4F0}
+.mon-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.09);font-size:.66rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#8FA6B5}
+.rec{display:inline-flex;align-items:center;gap:.45rem;color:#EAF4F0}
+.rec::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--crimson-lite);animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:.15}}
+.wave-shell{padding:.4rem .4rem 0;background:
+  repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 34px),
+  repeating-linear-gradient(rgba(255,255,255,.03) 0 1px,transparent 1px 34px)}
+#waveCanvas{width:100%;height:132px;display:block}
+.vitals-row{display:flex;flex-wrap:wrap}
+.stat{padding:1.3rem 1.5rem 1.4rem;border-left:1px solid rgba(255,255,255,.09);min-width:170px}
+.stat:first-child{border-left:none;flex:1.35 1 220px}
+.stat:nth-child(3){flex:1.1 1 190px}
+.stat .k{font-size:.62rem;font-weight:800;letter-spacing:.18em;color:#8FA6B5;text-transform:uppercase;margin-bottom:.35rem}
+.stat .num{font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:#fff;display:flex;align-items:baseline;gap:.35rem}
+.stat.s-vit .num{font-size:clamp(2.8rem,6vw,3.8rem);color:var(--trace)}
+.stat .num .u{font-size:.45em;color:var(--trace);font-weight:800}
+.stat:not(.s-vit) .num{font-size:clamp(2.1rem,4.4vw,2.9rem)}
+.joy-track{display:flex;gap:4px;margin-top:.55rem}
+.joy-track i{width:15px;height:9px;background:rgba(255,255,255,.13);border-radius:2px}
+.joy-track i.on{background:var(--trace)}
+#joyLabel{color:var(--crimson-lite);font-size:1rem;font-weight:900;letter-spacing:.06em;min-height:1.2em}
+.mon-foot{padding:.7rem 1.2rem .9rem;font-size:.62rem;letter-spacing:.12em;color:#5E7687;text-transform:uppercase;font-weight:700;border-top:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.readings-note{text-align:center;color:var(--mut);font-size:.8rem;font-style:italic;margin-top:1.1rem}
+
+/* ============================================================
+   04 · THE PRESCRIPTION PAD
+   ============================================================ */
+.pad-zone{position:relative;max-width:820px;margin:2.8rem auto 0}
+.pad{background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:var(--shadow-2);position:relative;overflow:hidden;padding:clamp(1.4rem,4vw,2.6rem) clamp(1.2rem,4vw,2.6rem) clamp(4.2rem,8vw,5rem)}
+.pad::before{content:"";position:absolute;top:0;bottom:0;left:52px;width:2px;background:rgba(200,16,46,.35)}
+@media(max-width:520px){.pad::before{left:26px}}
+.rx-watermark{position:absolute;right:-.06em;bottom:-.28em;font-family:'Caveat',cursive;font-size:11rem;font-weight:700;color:var(--teal);opacity:.06;pointer-events:none;user-select:none}
+.pad-top{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;border-bottom:3px double var(--ink);padding-bottom:1rem;margin-bottom:1.4rem}
+.pad-brand{display:flex;gap:.9rem;align-items:center}
+.pad-brand .ic{width:46px;height:46px;background:var(--mint);color:var(--teal);border-radius:12px;display:grid;place-items:center;font-size:1.3rem}
+.pad-brand h4{font-size:.95rem;font-weight:800;letter-spacing:.02em}
+.pad-brand p{font-size:.62rem;letter-spacing:.16em;color:var(--mut);font-weight:700;text-transform:uppercase}
+.status-chip{font-size:.62rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;padding:.45rem .8rem;border-radius:999px;white-space:nowrap;border:2px solid;transition:all .3s}
+.status-chip.pending{color:var(--amber);border-color:var(--amber);background:rgba(169,106,0,.07)}
+.status-chip.done{color:var(--ok);border-color:var(--ok);background:rgba(18,128,92,.08)}
+.meta-cols{display:flex;flex-wrap:wrap;gap:1.4rem 2.6rem;font-size:.78rem;margin-bottom:1.5rem}
+.meta-cols b{display:block;font-size:.6rem;letter-spacing:.18em;color:var(--mut);text-transform:uppercase;font-weight:800;margin-bottom:.15rem}
+.meta-cols span{font-weight:700}
+.narr{border-left:3px solid var(--mint);padding:.2rem 0 .2rem 1rem;margin-bottom:1.3rem}
+.narr .nk{font-size:.6rem;font-weight:800;letter-spacing:.2em;color:var(--teal);text-transform:uppercase;display:block;margin-bottom:.3rem}
+.narr p{font-size:.95rem;color:var(--ink-soft);line-height:1.8}
+.sig-table{margin:1.8rem 0 1.6rem;display:flex;flex-direction:column;gap:.85rem}
+.sig-line{display:grid;grid-template-columns:auto 1fr auto;gap:.9rem;align-items:baseline;font-size:.9rem}
+.sig-line .rx{font-family:Georgia,serif;font-style:italic;font-weight:700;color:var(--crimson);font-size:1.15rem;width:2.2ch}
+.sig-line .drug{font-weight:700}
+.sig-line .dots{flex:1;border-bottom:2px dotted var(--line);transform:translateY(-4px)}
+.sig-line .dose{color:var(--mut);font-size:.78rem;font-weight:600;white-space:nowrap}
+.signature-area{display:flex;justify-content:flex-end;margin-top:2rem}
+.sign{min-width:280px;text-align:right}
+.sign .hand{font-family:'Caveat',cursive;font-size:2rem;color:var(--teal-deep);transform:rotate(-3deg);display:block;margin-bottom:.1rem}
+.sign .rule{border-bottom:2px solid var(--ink);margin-bottom:.4rem}
+.sign .who{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);font-weight:800}
+.postscript{max-height:0;opacity:0;overflow:hidden;transition:max-height .6s,opacity .6s;font-family:'Caveat',cursive;font-size:1.25rem;color:var(--crimson);margin-top:1.2rem}
+.postscript.show{max-height:90px;opacity:1}
+
+/* ★ THE APPROVED STAMP — overlays the pad, animates on demand */
+.stamp-imprint{
+  position:absolute;right:4%;bottom:8%;width:min(240px,56%);aspect-ratio:1;
+  transform:rotate(-14deg) scale(3.2);opacity:0;pointer-events:none;mix-blend-mode:multiply;
+}
+.stamp-imprint.land{animation:stampSlam .42s cubic-bezier(.2,1.5,.35,1) forwards}
+@keyframes stampSlam{
+  0%{opacity:0;transform:rotate(-30deg) scale(3.2)}
+  55%{opacity:.97;transform:rotate(-12deg) scale(.94)}
+  75%{transform:rotate(-15deg) scale(1.04)}
+  100%{opacity:.95;transform:rotate(-14deg) scale(1)}
+}
+.shock{position:absolute;width:20px;height:20px;border-radius:50%;border:3px solid var(--crimson);opacity:0;pointer-events:none;z-index:5}
+.shock.go{animation:shockGo .7s ease-out forwards}
+@keyframes shockGo{0%{opacity:.85;transform:scale(.4)}100%{opacity:0;transform:scale(12)}}
+.pad.shake{animation:padShake .45s ease}
+@keyframes padShake{0%,100%{transform:none}20%{transform:translate(-5px,4px) rotate(-.5deg)}45%{transform:translate(4px,-4px) rotate(.4deg)}70%{transform:translate(-2px,2px)}}
+
+/* ============================================================
+   05 · COMMAND CENTER
+   ============================================================ */
+.cc-stage{position:relative;text-align:center;margin-top:2.8rem}
+.dir-arrows{display:flex;align-items:center;justify-content:center;gap:clamp(.5rem,3vw,1.8rem);margin-bottom:1.2rem}
+.dir-arrows i{color:var(--royal);font-size:clamp(1.3rem,4vw,2.4rem)}
+.dir-arrows .ar-r{animation:nudgeR 1.1s ease-in-out infinite}
+.dir-arrows .ar-l{animation:nudgeL 1.1s ease-in-out infinite}
+@keyframes nudgeR{0%,100%{transform:translateX(0)}50%{transform:translateX(9px)}}
+@keyframes nudgeL{0%,100%{transform:scaleX(-1) translateX(0)}50%{transform:scaleX(-1) translateX(9px)}}
+.btn-forge{
+  background:var(--royal);color:#fff;border:none;border-radius:999px;
+  font-weight:900;font-size:clamp(1.05rem,2.6vw,1.7rem);letter-spacing:.08em;text-transform:uppercase;
+  padding:clamp(1.3rem,3.5vw,2rem) clamp(2rem,6vw,4.4rem);
+  box-shadow:0 4px 0 var(--ink),0 16px 38px rgba(29,62,147,.35);
+  display:inline-flex;align-items:center;gap:.9rem;
+  transition:transform .28s cubic-bezier(.2,1.2,.3,1.4),background .4s,box-shadow .4s;
+}
+.btn-forge:hover{transform:scale(1.08);box-shadow:0 4px 0 var(--ink),0 22px 52px rgba(29,62,147,.42)}
+.btn-forge:active{transform:scale(1.02)}
+.btn-forge.snap{animation:pressSnap .34s cubic-bezier(.2,1.6,.3,1.2)}
+@keyframes pressSnap{0%{transform:scale(1)}40%{transform:scale(.95)}70%{transform:scale(1.04)}100%{transform:scale(1)}}
+.btn-forge.crimson{background:var(--crimson-deep);box-shadow:0 4px 0 #4d0912,0 16px 38px rgba(200,16,46,.4)}
+.btn-forge.crimson:hover{box-shadow:0 4px 0 #4d0912,0 22px 52px rgba(200,16,46,.5)}
+.btn-forge i{font-size:1.2em}
+.btn-caption{margin-top:1rem;color:var(--mut);font-size:.8rem}
+.btn-caption b{color:var(--crimson)}
+.supervisor{margin-top:.5rem;font-size:.66rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+.secondary-row{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;margin-top:2.8rem}
+.btn-aux{
+  background:var(--card);border:2px solid var(--teal);color:var(--teal-deep);
+  border-radius:14px;padding:1rem 1.4rem;min-width:230px;text-align:left;
+  display:flex;gap:.9rem;align-items:center;transition:background .25s,color .25s,transform .2s;
+}
+.btn-aux:hover{background:var(--teal);color:#fff;transform:translateY(-3px)}
+.btn-aux:disabled{opacity:.55;cursor:wait;transform:none}
+.btn-aux .bi{font-size:1.5rem;flex:none}
+.btn-aux b{display:block;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase}
+.btn-aux small{font-size:.72rem;opacity:.85}
+
+/* ============================================================
+   CHOCOLATE FIX — floatUp layer + FOOTER / TOAST / CONFETTI
+   ============================================================ */
+#floatLayer{position:fixed;inset:0;z-index:80;pointer-events:none;overflow:hidden}
+.float-item{position:absolute;bottom:-110px;left:var(--x);will-change:transform,opacity;animation:floatUp var(--dur) ease-in forwards}
+@keyframes floatUp{
+  0%{transform:translate(0,0) rotate(var(--r0));opacity:0}
+  12%{opacity:1}
+  100%{transform:translate(var(--dx),-118vh) rotate(var(--r1));opacity:0}
+}
+#confettiCanvas{position:fixed;inset:0;z-index:100;pointer-events:none}
+footer{border-top:1px solid var(--line);padding-block:2.6rem;text-align:center}
+footer .signoff{font-family:'Caveat',cursive;font-size:1.7rem;color:var(--teal-deep)}
+footer .pre{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);font-weight:800;margin-bottom:.3rem}
+footer .meta{margin-top:1.1rem;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);font-weight:700;display:flex;justify-content:center;gap:1.2rem;flex-wrap:wrap}
+footer .meta i{color:var(--teal)}
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,150%);z-index:120;background:var(--ink);color:#fff;padding:.9rem 1.4rem;border-radius:999px;font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:.7rem;box-shadow:var(--shadow-2);transition:transform .45s cubic-bezier(.2,1.2,.3,1.1);max-width:92vw}
+#toast.show{transform:translate(-50%,0)}
+#toast i{color:var(--trace)}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.15s !important}
+  html{scroll-behavior:auto}
+  .parade,#novelLayer{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="novelLayer" aria-hidden="true"></div>
+<div class="parade" id="parade" aria-hidden="true"></div>
+
+<!-- ======== TOP BAR ======== -->
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand">
+      <span class="cross"><i class="fa-solid fa-stethoscope"></i></span>
+      <span>CHART: J.&nbsp;DY<small>WARD F · DEPT. OF BEST FRIENDSHIP</small></span>
+    </div>
+    <div class="top-meta"><span>EST. CLASS&nbsp;5</span> <span class="opt">·</span> <span>BED №&nbsp;21</span></div>
+  </div>
+</header>
+
+<main>
+<!-- ================= 01 · CHECK-UP ================= -->
+<section id="checkup">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow reveal">01 · Admission Note — Emergency Dept. of Good News</span>
+        <div class="chart-label reveal">Patient Name:</div>
+        <h1 class="name-judy reveal">JUDY</h1>
+        <p class="akad reveal">a.k.a. The Boss · Best friend since Class 5 · Future Dr. Judy</p>
+        <div class="diag reveal">
+          <span class="lbl"><i class="fa-solid fa-heart-pulse"></i>&nbsp; Diagnosis:</span>
+          <span class="val">Turning <em>21</em> &amp; Being the <em>Best Friend</em></span>
+          <span class="note">— chronic, lifelong, incurable. Nobody’s looking for a cure.</span>
+        </div>
+      </div>
+
+      <aside class="chart-card reveal" aria-label="Patient chart">
+        <div class="cc-head">
+          <div class="avatar-badge" role="img" aria-label="Illustration of a medical student wearing round glasses">
+            <svg viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="96" fill="#FBFDFC" stroke="#0E7C86" stroke-width="2"/>
+              <circle cx="137" cy="47" r="15" fill="#3B2E2A"/>
+              <ellipse cx="100" cy="92" rx="34" ry="37" fill="#F4CDA6"/>
+              <path d="M53,92 Q49,36 100,32 Q151,36 147,92 Q149,62 133,50 Q119,41 100,43 Q77,45 67,61 Q56,72 53,92 Z" fill="#3B2E2A"/>
+              <rect x="91" y="122" width="18" height="14" fill="#F4CDA6"/>
+              <path d="M36,182 Q40,140 79,131 L100,143 L121,131 Q160,140 164,182 Z" fill="#FFFFFF" stroke="#13273D" stroke-width="3"/>
+              <path d="M79,131 L100,153 L121,131 Z" fill="#0E7C86"/>
+              <path d="M79,131 L93,145 M121,131 L107,145" stroke="#13273D" stroke-width="2.5" fill="none"/>
+              <rect x="48" y="160" width="30" height="20" rx="3" fill="#FBFDFC" stroke="#13273D" stroke-width="2"/>
+              <rect x="56" y="150" width="5" height="14" rx="2" fill="#C8102E"/>
+              <rect x="118" y="157" width="32" height="15" rx="2" fill="#FFF8E7" stroke="#13273D" stroke-width="2"/>
+              <path d="M129,161 h10 M134,156 v10" stroke="#C8102E" stroke-width="2.5"/>
+              <path d="M76,133 C74,158 86,167 100,169 M124,133 C126,158 114,167 100,169" fill="none" stroke="#13273D" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="100" cy="173" r="8" fill="#FFFFFF" stroke="#13273D" stroke-width="3.5"/>
+              <circle cx="100" cy="173" r="2.5" fill="#13273D"/>
+              <g fill="rgba(14,124,134,.08)" stroke="#14283C" stroke-width="5">
+                <circle cx="82" cy="92" r="19"/><circle cx="118" cy="92" r="19"/>
+              </g>
+              <path d="M66,79 Q100,68 134,79" fill="none" stroke="#14283C" stroke-width="4" stroke-linecap="round"/>
+              <path d="M101,90 Q100,86 99,90" fill="none" stroke="#14283C" stroke-width="4"/>
+              <circle cx="82" cy="93" r="3" fill="#13273D"/><circle cx="118" cy="93" r="3" fill="#13273D"/>
+              <circle cx="84" cy="91" r="1.1" fill="#fff"/><circle cx="120" cy="91" r="1.1" fill="#fff"/>
+              <path d="M90,116 Q100,124 110,116" fill="none" stroke="#13273D" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Judy M.</h3>
+            <p>Future Doctor · Chief of Everything</p>
+          </div>
+        </div>
+        <div class="chart-rows">
+          <div class="row"><span class="k">MRN</span><span class="lead"></span><span class="v">JD-2105</span></div>
+          <div class="row"><span class="k">Age</span><span class="lead"></span><span class="v">21 — as of today</span></div>
+          <div class="row"><span class="k">Allergies</span><span class="lead"></span><span class="v">Giving up, bad Wi-Fi</span></div>
+          <div class="row"><span class="k">Status</span><span class="lead"></span><span class="v">Turning heads &amp; pages</span></div>
+          <div class="row"><span class="k">Consultant</span><span class="lead"></span><span class="v">Dr. Whiskers, DVM</span></div>
+        </div>
+        <div class="barcode" aria-hidden="true"></div>
+      </aside>
+    </div>
+
+    <div class="ecg-strip" aria-hidden="true">
+      <svg viewBox="0 0 600 60" preserveAspectRatio="none">
+        <path class="ecg-base" d="M0 38 h40 l8 -18 l9 34 l7 -26 l6 10 h30 h40 l8 -18 l9 34 l7 -26 l6 10 h30 h40 l8 -18 l9 34 l7 -26 l6 10 h30 h40 l8 -18 l9 34 l7 -26 l6 10 h30 h40 l8 -18 l9 34 l7 -26 l6 10 h30"/>
+        <path class="ecg-run"  pathLength="600" d="M0 38 h40 l8 -18 l9 34 l7 -26 l6 10 h30 h40 l8 -18 l9 34 l7 -26 l6 10 h30 h40 l8 -18 l9 34 l7 -26 l6 10 h30 h40 l8 -18 l9 34 l7 -26 l6 10 h30"/>
+      </svg>
+    </div>
+    <div class="cue"><span>The chart continues</span><i class="fa-solid fa-arrow-down"></i></div>
+  </div>
+</section>
+
+<!-- ================= 02 · THE PULSE ================= -->
+<section id="pulse">
+  <div class="wrap">
+    <div class="tl-head reveal">
+      <span class="eyebrow" style="justify-content:center;display:inline-flex">02 · The Pulse</span>
+      <h2 class="sec-title">A Decade on One Continuous Monitor</h2>
+      <p class="sec-sub" style="margin-inline:auto">Every spike on this line is real. Tap any entry to open its chart notes — doctors are curious people, after all.</p>
+    </div>
+
+    <div class="tl-wrap" id="tlWrap">
+      <div class="rail" aria-hidden="true"><div class="rail-fill" id="railFill"></div></div>
+
+      <article class="tl-item reveal">
+        <div class="tl-node"><span class="dot"></span></div>
+        <div class="tl-body">
+          <span class="tl-era"><i class="fa-solid fa-pencil"></i> Primary School · Class 5</span>
+          <h3>Initial Presentation</h3>
+          <p>Two desks, one crayon dispute (obviously about colors), and a friendship admitted for observation — upgraded to lifelong care by week’s end.</p>
+          <button class="note-toggle" aria-expanded="false">Open chart note <i class="fa-solid fa-plus"></i></button>
+          <div class="chart-note"><p>Clinical note: nobody else was ever allowed to sit with us. Ever.</p></div>
+        </div>
+      </article>
+
+      <article class="tl-item reveal">
+        <div class="tl-node"><span class="dot"></span></div>
+        <div class="tl-body">
+          <span class="tl-era"><i class="fa-solid fa-book"></i> Growing Years</span>
+          <h3>Steady Saturation</h3>
+          <p>Homework photocopies, shared lunches, and a private language nobody else could decode. Vitals strong; laughter trending sharply upward.</p>
+          <button class="note-toggle" aria-expanded="false">Open chart note <i class="fa-solid fa-plus"></i></button>
+          <div class="chart-note"><p>Nursing staff reported excessive giggling. The complaint was dismissed.</p></div>
+        </div>
+      </article>
+
+      <article class="tl-item reveal">
+        <div class="tl-node"><span class="dot"></span></div>
+        <div class="tl-body">
+          <span class="tl-era"><i class="fa-solid fa-user-doctor"></i> The White-Coat Era</span>
+          <h3>Specialization Begins</h3>
+          <p>You chose medicine. Medicine just doesn’t know yet how lucky it is — anatomy towers assembled, doubts buried underneath.</p>
+          <button class="note-toggle" aria-expanded="false">Open chart note <i class="fa-solid fa-plus"></i></button>
+          <div class="chart-note"><p>Observed side effect: frankly unreasonable levels of determination.</p></div>
+        </div>
+      </article>
+
+      <article class="tl-item reveal">
+        <div class="tl-node"><span class="dot"></span></div>
+        <div class="tl-body">
+          <span class="tl-era"><i class="fa-solid fa-comments"></i> 2024 · Recovery Confirmed</span>
+          <h3>Daily Chats — Restored</h3>
+          <p>A few quiet pages in the log, then the best entry of the year: back to talking every single day. The line never flatlined. It never will.</p>
+          <button class="note-toggle" aria-expanded="false">Open chart note <i class="fa-solid fa-plus"></i></button>
+          <div class="chart-note"><p>Correction filed: best-friendship formally upgraded to daily coverage.</p></div>
+        </div>
+      </article>
+
+      <article class="tl-item reveal">
+        <div class="tl-node"><span class="dot"></span></div>
+        <div class="tl-body">
+          <span class="tl-era"><i class="fa-solid fa-star"></i> The Future · 21+</span>
+          <h3>Prognosis: Excellent</h3>
+          <p>Coat tailored, grad-cap reserved, an entire decade of victories already queued. And whichever ward you walk into — I’m already on your team.</p>
+          <button class="note-toggle" aria-expanded="false">Open chart note <i class="fa-solid fa-plus"></i></button>
+          <div class="chart-note"><p>Follow-up schedule: forever.</p></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 03 · VITAL SIGNS ================= -->
+<section id="vitals">
+  <div class="wrap">
+    <div style="text-align:center;margin-bottom:2.2rem" class="reveal">
+      <span class="eyebrow" style="justify-content:center;display:inline-flex">03 · Vital Signs</span>
+      <h2 class="sec-title">Bedside Monitor — Reading Live</h2>
+    </div>
+
+    <div class="monitor reveal" role="group" aria-label="Friendship vital signs monitor">
+      <div class="mon-head"><span>Multi-parameter monitor · Ward F, Bed 05</span><span class="rec">Monitoring</span></div>
+      <div class="wave-shell"><canvas id="waveCanvas"></canvas></div>
+      <div class="vitals-row">
+        <div class="stat s-vit">
+          <div class="k">Friendship Vitality</div>
+          <div class="num"><span data-count="100">0</span><span class="u">%</span></div>
+        </div>
+        <div class="stat">
+          <div class="k">Years Known</div>
+          <div class="num"><span data-count="10">0</span><span class="u">+</span></div>
+        </div>
+        <div class="stat">
+          <div class="k">Birthday Joy</div>
+          <div class="num" style="align-items:center"><span id="joyWord">—</span></div>
+          <div class="joy-track" id="joyTrack"></div>
+          <div id="joyLabel"></div>
+        </div>
+        <div class="stat">
+          <div class="k">Heart Rate (Excitement)</div>
+          <div class="num"><span id="hrNum">76</span><span class="u">bpm</span></div>
+        </div>
+      </div>
+      <div class="mon-foot"><span>Lead II · Filter: nostalgia</span><span>Alarm limits: joy ≥ maximum</span></div>
+    </div>
+    <p class="readings-note">All readings independently verified by the attending best friend — Class 5 cohort, original registrar.</p>
+
+    <div class="cue"><span>Follow the arrows to the doctor’s orders</span><i class="fa-solid fa-arrow-down"></i></div>
+  </div>
+</section>
+
+<!-- ================= 04 · THE PRESCRIPTION ================= -->
+<section id="prescription">
+  <div class="wrap">
+    <div class="reveal" style="text-align:center">
+      <span class="eyebrow" style="justify-content:center;display:inline-flex">04 · The Prescription</span>
+      <h2 class="sec-title">From Your Attending</h2>
+      <p class="sec-sub" style="margin-inline:auto">Printed on official — emotionally binding — stationery.</p>
+    </div>
+
+    <div class="pad-zone">
+      <div class="pad reveal" id="pad">
+        <span class="rx-watermark" aria-hidden="true">Rx</span>
+
+        <div class="pad-top">
+          <div class="pad-brand">
+            <span class="ic"><i class="fa-solid fa-kit-medical"></i></span>
+            <div>
+              <h4>WARD F CLINIC · FRIENDSHIP MEDICINE</h4>
+              <p>Licensed to heal awkward silences since Class 5</p>
+            </div>
+          </div>
+          <span class="status-chip pending" id="rxStatus">Awaiting patient approval</span>
+        </div>
+
+        <div class="meta-cols">
+          <div><b>Patient</b><span>Judy</span></div>
+          <div><b>Date</b><span id="todayDate">—</span></div>
+          <div><b>Prescriber</b><span>Your Best Friend, B.F.M.D.</span></div>
+          <div><b>Pharmacist</b><span>Dr. Whiskers, DVM</span></div>
+        </div>
+
+        <div class="narr">
+          <span class="nk">Social History</span>
+          <p>I’m sorry I haven’t been present; I let some bad habits get in the way, but I’ve moved past that and am really focused on being a better friend again. My prescription for you: An amazing year ahead.</p>
+        </div>
+
+        <div class="narr">
+          <span class="nk">Course &amp; Prognosis</span>
+          <p>From our Class 5 primary school days through your time as a former lesbian to the powerful, straight future doctor you are now. You have always been the one in charge, and I’m ready to follow your lead back into our daily friendship.</p>
+        </div>
+
+        <div class="sig-table">
+          <div class="sig-line"><span class="rx">Rx</span><span class="drug">Daily chats — one per day, mornings preferred</span><span class="dots"></span><span class="dose">Refills: ∞</span></div>
+          <div class="sig-line"><span class="rx">Rx</span><span class="drug">Shared chocolate, as needed for stress</span><span class="dots"></span><span class="dose">Dispense: generously</span></div>
+          <div class="sig-line"><span class="rx">Rx</span><span class="drug">Amazing year ahead — take continuously for 365 days</span><span class="dots"></span><span class="dose">No substitutions</span></div>
+        </div>
+
+        <div class="signature-area">
+          <div class="sign">
+            <span class="hand">Your Best Friend</span>
+            <div class="rule"></div>
+            <span class="who">License № CD5-2014 · Certified Duo since Class 5</span>
+          </div>
+        </div>
+
+        <p class="postscript" id="postscript">Postscript: refill privileges granted in perpetuity. — Dr. W.</p>
+
+        <!-- ★ THE APPROVED STAMP -->
+        <div class="stamp-imprint" id="stampImprint" role="img" aria-label="Red APPROVED stamp">
+          <svg viewBox="0 0 260 260">
+            <circle cx="130" cy="130" r="122" fill="none" stroke="#C8102E" stroke-width="7"/>
+            <circle cx="130" cy="130" r="102" fill="none" stroke="#C8102E" stroke-width="2.5"/>
+            <defs>
+              <path id="arcTop" d="M44,138 A88,88 0 0 1 216,138"/>
+              <path id="arcBot" d="M48,142 A84,84 0 0 0 212,142"/>
+            </defs>
+            <text font-family="Montserrat,sans-serif" font-weight="800" font-size="14" letter-spacing="3" fill="#C8102E">
+              <textPath href="#arcTop" startOffset="50%" text-anchor="middle">WARD F · RX №21 · OFFICIALLY SEALED</textPath>
+            </text>
+            <text font-family="Montserrat,sans-serif" font-weight="800" font-size="12" letter-spacing="2.4" fill="#C8102E">
+              <textPath href="#arcBot" startOffset="50%" text-anchor="middle">DR. WHISKERS · WITNESSED</textPath>
+            </text>
+            <text x="130" y="146" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="900" font-size="42" letter-spacing="1" fill="#C8102E">APPROVED</text>
+            <text x="130" y="172" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="11.5" letter-spacing="3.4" fill="#C8102E">IN CRIMSON</text>
+            <path d="M100,104 l8,9 l16,-19" fill="none" stroke="#C8102E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="shock" id="shock" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 05 · COMMAND CENTER ================= -->
+<section id="command" style="padding-top:2rem">
+  <div class="wrap">
+    <div class="reveal" style="text-align:center">
+      <span class="eyebrow" style="justify-content:center;display:inline-flex">05 · Doctor’s Orders</span>
+      <h2 class="sec-title">The Command Center</h2>
+      <p class="sec-sub" style="margin-inline:auto">You’re the attending now, Dr. Judy. Every control below answers only to you — press in any order; repeated presses encouraged.</p>
+    </div>
+
+    <div class="cc-stage reveal">
+      <div class="dir-arrows" aria-hidden="true">
+        <i class="fa-solid fa-angles-right ar-l"></i>
+        <i class="fa-solid fa-angles-right ar-r"></i>
+      </div>
+
+      <button class="btn-forge" id="btnForgive">
+        <i class="fa-solid fa-heart-pulse"></i> Request Forgiveness
+      </button>
+
+      <p class="btn-caption">This stamps the prescription above. <b>Permanently.</b> In crimson ink.</p>
+      <p class="supervisor">Supervising physician: Judy · Authority: absolute</p>
+
+      <div class="secondary-row">
+        <button class="btn-aux" id="btnChoco">
+          <i class="fa-solid fa-cookie-bite bi"></i>
+          <span><b>Chocolate Fix</b><small>Emergency chocolate + kitten infusion</small></span>
+        </button>
+        <button class="btn-aux" id="btnParty">
+          <i class="fa-solid fa-champagne-glasses bi"></i>
+          <span><b>Discharge Party Meds</b><small>Deploy celebration payload immediately</small></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="pre">Signed with a perfectly regular sinus rhythm,</p>
+    <p class="signoff">your best friend since Class 5</p>
+    <div class="meta">
+      <span><i class="fa-solid fa-stethoscope"></i> Ward F · Bed 21</span>
+      <span><i class="fa-solid fa-door-open"></i> Visiting hours: always</span>
+      <span><i class="fa-solid fa-heart"></i> Prognosis: together</span>
+    </div>
+  </div>
+</footer>
+
+<div id="floatLayer" aria-hidden="true"></div>
+<canvas id="confettiCanvas" aria-hidden="true"></canvas>
+<div id="toast" role="status" aria-live="polite"><i class="fa-solid fa-heart-pulse" id="toastIcon"></i><span id="toastText"></span></div>
+
+<script>
+(() => {
+"use strict";
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const rnd = (a,b) => a + Math.random()*(b-a);
+
+/* ================= TOAST ================= */
+let toastT;
+function toast(msg, icon="fa-heart-pulse"){
+  $("#toastIcon").className = "fa-solid " + icon;
+  $("#toastText").textContent = msg;
+  const t = $("#toast");
+  t.classList.remove("show"); void t.offsetWidth;
+  t.classList.add("show");
+  clearTimeout(toastT);
+  toastT = setTimeout(()=> t.classList.remove("show"), 3400);
+}
+
+/* ================= BACKGROUND · ROMANCE NOVELS ================= */
+(function novels(){
+  if(reduced) return;
+  const layer = $("#novelLayer");
+  const BOOK = (fill,spineFill,heartFill,w,h,lean) => `
+    <g transform="rotate(${lean} ${w/2} ${h/2})">
+      <rect x="4" y="2" width="${w}" height="${h}" rx="4" fill="${fill}"/>
+      <rect x="4" y="2" width="${Math.round(w*.2)}" height="${h}" rx="4" fill="${spineFill}"/>
+      <rect x="${Math.round(w*.84)}" y="4" width="${Math.max(2,Math.round(w*.07))}" height="${h-4}" fill="${spineFill}" opacity=".45"/>
+      <path d="M${w*.5},${h*.34} c-${w*.14},-${h*.13} -${w*.36},${h*.04} 0,${h*.2} c${w*.36},-${h*.16} ${w*.14},${h*.33} 0,-${h*.2} Z" fill="${heartFill}"/>
+    </g>`;
+  const single = (s,f1,f2,f3) => `<svg width="${s}" height="${s*1.35}" viewBox="0 0 48 64">${BOOK(f1,f2,f3,40,60,0)}</svg>`;
+  const couple = s => `<svg width="${s}" height="${s*1.4}" viewBox="0 0 76 64">${BOOK("#0E7C86","#0A5259","#F6F7F5",40,60,-7)}<g transform="translate(30,2)">${BOOK("#1D3E93","#12265C","#FFB3C0",38,58,9)}</g></svg>`;
+  for(let i=0;i<9;i++){
+    const el = document.createElement("div");
+    el.className = "novel";
+    el.style.cssText = `left:${rnd(-2,96)}vw;--dur:${rnd(22,38)}s;--del:${-rnd(0,32)}s;--sdur:${rnd(4,7)}s;--op:${rnd(.05,.1).toFixed(2)}`;
+    const kind = Math.random();
+    el.innerHTML = `<span class="sway">${
+      kind < .3 ? couple(rnd(34,56)|0)
+      : kind < .65 ? single(rnd(30,50)|0,"#0E7C86","#0A5259","#F6F7F5")
+                   : single(rnd(30,50)|0,"#1D3E93","#12265C","#FFB3C0")
+    }</span>`;
+    layer.appendChild(el);
+  }
+})();
+
+/* ================= BACKGROUND · WALKING CAT PARADE ================= */
+(function parade(){
+  if(reduced) return;
+  const layer = $("#parade");
+  // Side-profile walking cat, glasses knocked out in paper tone, legs animated via CSS gait classes
+  const catSVG = () => `
+    <svg viewBox="0 0 128 84" fill="none">
+      <!-- tail -->
+      <path class="tailSway" d="M22,48 C8,47 4,31 15,25 C19,23 23,26 21,29 C14,33 18,42 26,42"
+        stroke="#1D3E93" stroke-width="7" stroke-linecap="round"/>
+      <!-- legs: four gait phases -->
+      <g fill="#1D3E93">
+        <rect class="gait a" x="36" y="52" width="7" height="24" rx="3.5"/>
+        <rect class="gait b" x="50" y="53" width="7" height="23" rx="3.5"/>
+        <rect class="gait b" x="76" y="52" width="7" height="24" rx="3.5"/>
+        <rect class="gait a" x="90" y="53" width="7" height="23" rx="3.5"/>
+      </g>
+      <!-- body -->
+      <ellipse cx="62" cy="49" rx="30" ry="14" fill="#1D3E93"/>
+      <!-- neck + head -->
+      <path d="M84,44 L98,32 L102,44 Z" fill="#1D3E93"/>
+      <circle cx="102" cy="31" r="15" fill="#1D3E93"/>
+      <!-- ears -->
+      <path d="M91,23 l3.5,-12 l8.5,8 Z M103,20 l6,-11 l6,11 Z" fill="#1D3E93"/>
+      <!-- tiny glasses (knocked out in paper tone) -->
+      <g>
+        <circle cx="97" cy="30" r="5.2" fill="#F6F7F5"/>
+        <circle cx="108.5" cy="30" r="5.2" fill="#F6F7F5"/>
+        <path d="M102,30 h1.4 M91.5,29 l-3.5,-1.5" stroke="#F6F7F5" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <!-- whiskers hint -->
+      <path d="M114,33 h5 M114,36 h5" stroke="#1D3E93" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>`;
+  const walkers = [
+    {sz:64, d:30, del:-3},
+    {sz:46, d:41, del:-19},
+    {sz:36, d:52, del:-9},
+    {sz:74, d:26, del:-25},
+    {sz:52, d:35, del:-14},
+  ];
+  walkers.forEach(w=>{
+    const el = document.createElement("div");
+    el.className = "walker";
+    el.style.cssText = `--d:${w.d}s;--del:${w.del}s;--sz:${w.sz}px`;
+    el.innerHTML = `<span class="bob">${catSVG()}</span>`;
+    layer.appendChild(el);
+  });
+})();
+
+/* ================= SCROLL PROGRESS + REVEALS ================= */
+addEventListener("scroll", () => {
+  const h = document.documentElement;
+  $("#progress").style.width = (h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+"%";
+}, {passive:true});
+
+const io = new IntersectionObserver(es => es.forEach(e=>{
+  if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);}
+}),{threshold:.16});
+ $$(".reveal").forEach(el=>io.observe(el));
+
+/* ================= TIMELINE FOLD-OUTS (JS max-height toggle) ================= */
+ $$(".note-toggle").forEach(btn=>{
+  btn.addEventListener("click", () => {
+    const item = btn.closest(".tl-item");
+    const open = !item.classList.contains("open");
+    item.classList.toggle("open", open);
+    btn.setAttribute("aria-expanded", String(open));
+    pump(8);
+  });
+});
+
+/* ================= TIMELINE RAIL FILL ================= */
+const tlWrap = $("#tlWrap");
+function railUpdate(){
+  const r = tlWrap.getBoundingClientRect();
+  const p = Math.min(1, Math.max(0, (innerHeight*.62 - r.top) / r.height));
+  $("#railFill").style.height = (p*100)+"%";
+}
+addEventListener("scroll", railUpdate, {passive:true});
+addEventListener("resize", railUpdate); railUpdate();
+
+/* ================= VITALS: COUNT-UPS + JOY METER ================= */
+function countUp(el){
+  const target = +el.dataset.count, t0 = performance.now(), dur=1400;
+  (function f(now){
+    const p = Math.min(1,(now-t0)/dur), e = 1-Math.pow(1-p,3);
+    el.textContent = Math.round(target*e);
+    if(p<1) requestAnimationFrame(f);
+  })(t0);
+}
+const cio = new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting) return;
+  e.target.querySelectorAll("[data-count]").forEach(countUp);
+  startJoy();
+  cio.unobserve(e.target);
+}),{threshold:.35});
+cio.observe($(".monitor"));
+
+const track = $("#joyTrack");
+for(let i=0;i<10;i++) track.appendChild(document.createElement("i"));
+let joyDone=false;
+function startJoy(){
+  if(joyDone) return; joyDone=true;
+  const cells=[...track.children]; let i=0;
+  const iv=setInterval(()=>{
+    if(i<cells.length) cells[i++].classList.add("on");
+    else{
+      clearInterval(iv);
+      $("#joyWord").textContent="MAX";
+      $("#joyLabel").textContent="Saturation achieved.";
+      pump(40);
+    }
+  }, 90);
+}
+
+/* ================= LIVE ECG CANVAS + HEART RATE MODEL ================= */
+let excite=0, bpmShown=76;
+window.pump = n => { excite = Math.min(140, excite + n); };
+ $(".name-judy").addEventListener("mouseenter", ()=>pump(14));
+
+const cvs=$("#waveCanvas"), ctx=cvs.getContext("2d");
+let W,H,buffer,col=0;
+function sizeWave(){
+  const dpr=Math.min(2,devicePixelRatio||1);
+  W=Math.max(60,cvs.clientWidth|0); H=cvs.clientHeight;
+  cvs.width=W*dpr; cvs.height=H*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle="#0A1722"; ctx.fillRect(0,0,W,H);
+  buffer=new Float32Array(W).fill(H*.62);
+  col=0;
+}
+sizeWave(); addEventListener("resize", sizeWave);
+
+// Synthetic PQRST complex: gaussian bumps (P dip, QRS spike, T recovery)
+const g=(u,c,w)=>Math.exp(-((u-c)*(u-c))/(2*w*w));
+function waveAt(u){
+  return g(u,.12,.028)*8 - g(u,.235,.008)*10 + g(u,.262,.010)*52
+       - g(u,.287,.011)*18 + g(u,.45,.05)*14 + (Math.random()-.5)*2.2;
+}
+
+let prev=performance.now(), hrTick=prev, phase=0, carry=0;
+(function loop(now){
+  const dt=Math.min(.06,(now-prev)/1000); prev=now;
+  const bpm=76+excite; excite=Math.max(0, excite-dt*26);
+
+  if(!reduced){
+    carry += 120*dt;                       // sweep speed: px/frame-budget
+    const steps=carry|0; carry-=steps;
+    const mid=H*.62, amp=H*.0115;
+    for(let s=0;s<steps;s++){
+      phase += dt/Math.max(steps,1)/(60/bpm);
+      const y = mid - waveAt(phase%1)*amp;
+      const nx=(col+1)%W;
+      buffer[nx]=y;
+      ctx.fillStyle="#0A1722";
+      ctx.fillRect(col%W,0,1,H);           // re-darken previous edge pixel first
+      ctx.strokeStyle="#3BE3A8"; ctx.lineWidth=2; ctx.lineCap="round";
+      ctx.beginPath();
+      ctx.moveTo(col%W, buffer[col%W]);
+      ctx.lineTo(nx,y);
+      ctx.stroke();
+      col++;
+    }
+    // blank gap ahead of the writing head
+    ctx.fillStyle="#0A1722";
+    for(let gp=1;gp<=26;gp++){ ctx.fillRect((col+gp)%W,0,1,H); }
+  }
+  if(now-hrTick>380){ hrTick=now; bpmShown=Math.round(bpm+rnd(-2,2)); $("#hrNum").textContent=bpmShown; }
+  requestAnimationFrame(loop);
+})(prev);
+
+/* ================= CONFETTI ENGINE (hearts · band-aids · cakes) ================= */
+const cCan=$("#confettiCanvas"), cc=cCan.getContext("2d");
+let parts=[], cRunning=false;
+function sizeConf(){
+  cCan.width=innerWidth*devicePixelRatio; cCan.height=innerHeight*devicePixelRatio;
+  cc.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+}
+sizeConf(); addEventListener("resize",sizeConf);
+
+function mkSpr(fn){ const c=document.createElement("canvas"); c.width=c.height=56;
+  const x=c.getContext("2d"); x.translate(28,28); fn(x); return c; }
+function rounded(g,x,y,w,h,r){ g.beginPath();
+  g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r);
+  g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
+function heart(col){ return mkSpr(g=>{ g.fillStyle=col; g.beginPath();
+  g.moveTo(0,12); g.bezierCurveTo(-18,-4,-11,-17,0,-8); g.bezierCurveTo(11,-17,18,-4,0,12);
+  g.fill(); });}
+function band(){ return mkSpr(g=>{
+  g.fillStyle="#EFC98F"; rounded(g,-21,-9,42,18,9); g.fill();
+  g.strokeStyle="rgba(19,39,61,.3)"; g.lineWidth=1.4; rounded(g,-21,-9,42,18,9); g.stroke();
+  g.fillStyle="#F7E3C2"; rounded(g,-6.5,-6.5,13,13,3); g.fill();
+  g.fillStyle="#C79A62";
+  [[-13,-3],[-13,3],[13,-3],[13,3]].forEach(p=>{g.beginPath();g.arc(p[0],p[1],1.6,0,7);g.fill();});
+});}
+function capsule(a,b){ return mkSpr(g=>{
+  g.fillStyle=a; rounded(g,-18,-9,36,18,9); g.fill();
+  g.save(); g.beginPath(); g.rect(0,-10,19,20); g.clip();
+  g.fillStyle=b; rounded(g,-18,-9,36,18,9); g.fill(); g.restore();
+  g.strokeStyle="rgba(19,39,61,.35)"; g.lineWidth=1.5; rounded(g,-18,-9,36,18,9); g.stroke();
+});}
+function cakeSpr(){ return mkSpr(g=>{
+  // plate
+  g.fillStyle="rgba(19,39,61,.25)"; rounded(g,-17,11,34,4,2); g.fill();
+  // tiers
+  g.fillStyle="#FDEBC8"; g.strokeStyle="rgba(19,39,61,.35)"; g.lineWidth=1.4;
+  rounded(g,-14,1,28,10,3); g.fill(); g.stroke();
+  rounded(g,-9.5,-9,19,10,3); g.fill(); g.stroke();
+  // icing dollops
+  g.fillStyle="#E58BA6";
+  [[-11,1],[-5,0],[1,1],[7,0]].forEach(p=>{g.beginPath();g.arc(p[0],p[1],2.6,0,7);g.fill();});
+  [[-7,-9],[-1,-10],[5,-9]].forEach(p=>{g.beginPath();g.arc(p[0],p[1],2.2,0,7);g.fill();});
+  // candle + flame
+  g.fillStyle="#C8102E"; g.fillRect(-1.2,-17,2.4,8);
+  g.fillStyle="#F2A93B"; g.beginPath(); g.moveTo(0,-22); g.quadraticCurveTo(3,-18.5,0,-16.5); g.quadraticCurveTo(-3,-18.5,0,-22); g.fill();
+});}
+const HEARTS=[heart("#C8102E"),heart("#E58BA6"),heart("#0E7C86")];
+const PARTY =[heart("#C8102E"),heart("#E58BA6"),band(),cakeSpr(),cakeSpr(),capsule("#0E7C86","#FFFFFF")];
+
+function burst(x,y,count,set=PARTY,power=1){
+  if(reduced) return;
+  for(let i=0;i<count;i++){
+    parts.push({x,y,vx:rnd(-1,1)*7*power,vy:-rnd(4,12)*power,
+      rot:rnd(0,6.3),vr:rnd(-.2,.2),sc:rnd(.55,1.15),
+      life:rnd(90,150)|0,spr:set[Math.random()*set.length|0]});
+  }
+  if(!cRunning){ cRunning=true; confLoop(); }
+}
+function confLoop(){
+  cc.clearRect(0,0,innerWidth,innerHeight);
+  parts=parts.filter(p=>p.life>0 && p.y<innerHeight+60);
+  parts.forEach(p=>{
+    p.vy+=.22; p.vx*=.992; p.vy*=.995;
+    p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life--;
+    cc.save(); cc.globalAlpha=Math.min(1,p.life/26);
+    cc.translate(p.x,p.y); cc.rotate(p.rot); cc.scale(p.sc,p.sc);
+    cc.drawImage(p.spr,-28,-28); cc.restore();
+  });
+  if(parts.length) requestAnimationFrame(confLoop);
+  else { cRunning=false; cc.clearRect(0,0,innerWidth,innerHeight); }
+}
+
+/* ================= COMMAND 1 · REQUEST FORGIVENESS ================= */
+ $("#todayDate").textContent=new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+
+let approved=false, stampBusy=false;
+ $("#btnForgive").addEventListener("click", async function onClick(){
+  const btn=this;
+  if(stampBusy) return;
+
+  // ① press feedback: scale(0.95) → snap back (animation wins over hover transform)
+  btn.classList.remove("snap"); void btn.offsetWidth; btn.classList.add("snap");
+
+  stampBusy=true;
+
+  // ② one-time state change: text + deep crimson
+  if(!approved){
+    approved=true;
+    pump(120);
+    setTimeout(()=>{
+      btn.classList.add("crimson");
+      btn.innerHTML='<i class="fa-solid fa-check-double"></i>&nbsp;Approved in Crimson';
+    }, 170);
+    toast("Verdict rendered. Filed in crimson — it’s official.","fa-heart-pulse");
+  }else{
+    pump(60);
+  }
+
+  // ③ bring the prescription pad into view, then SLAM the stamp onto it
+  const pad=$("#pad");
+  pad.scrollIntoView({block:"center", behavior:reduced?"auto":"smooth"});
+  await wait(reduced?60:750);
+
+  const stamp=$("#stampImprint"), shock=$("#shock");
+  stamp.classList.remove("land"); void stamp.offsetWidth;
+  shock.classList.remove("go");
+  pad.classList.remove("shake"); void pad.offsetWidth;
+
+  shock.style.left=`calc(${getComputedStyle(pad).direction==="rtl"?4:4}% + ${stamp.offsetWidth*.28}px)`;
+  shock.style.right="auto"; shock.style.bottom="calc(8% + "+stamp.offsetHeight*.35+")"; shock.style.top="auto";
+
+  pad.classList.add("shake");
+  stamp.classList.add("land");
+  shock.classList.add("go");
+
+  setTimeout(()=>{
+    const r=stamp.getBoundingClientRect();
+    burst(r.left+r.width/2, r.top+r.height*.55, 24, HEARTS, .85);
+  }, 230);
+
+  // ④ lock in the paperwork
+  setTimeout(()=>{
+    const chip=$("#rxStatus");
+    chip.textContent="Forgiven — Rx verified";
+    chip.className="status-chip done";
+    $("#postscript").classList.add("show");
+  }, 420);
+
+  await wait(reduced?60:900);
+  stampBusy=false;
+});
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ================= COMMAND 2 · CHOCOLATE FIX (floatUp rain, reversed) ================= */
+const BAR = s=>`<svg width="${s}" viewBox="0 0 64 64">
+  <rect x="7" y="12" width="50" height="40" rx="6" fill="#5A3A22" stroke="#3d2716" stroke-width="2"/>
+  <rect x="13" y="18" width="16" height="12" rx="2" fill="#7C5433"/><rect x="31" y="18" width="16" height="12" rx="2" fill="#7C5433"/>
+  <rect x="13" y="32" width="16" height="12" rx="2" fill="#7C5433"/><rect x="31" y="32" width="16" height="12" rx="2" fill="#7C5433"/>
+  <path d="M12,16 q10,-4 20,-1" stroke="#8f6440" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>`;
+const PAW = s=>`<svg width="${s}" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="40" rx="14" ry="11" fill="#E58BA6" stroke="#13273D" stroke-width="2.4"/>
+  <ellipse cx="17" cy="26" rx="5.5" ry="6.5" fill="#E58BA6" stroke="#13273D" stroke-width="2.4" transform="rotate(-18 17 26)"/>
+  <ellipse cx="27" cy="19" rx="5.5" ry="6.5" fill="#E58BA6" stroke="#13273D" stroke-width="2.4"/>
+  <ellipse cx="37" cy="19" rx="5.5" ry="6.5" fill="#E58BA6" stroke="#13273D" stroke-width="2.4"/>
+  <ellipse cx="47" cy="26" rx="5.5" ry="6.5" fill="#E58BA6" stroke="#13273D" stroke-width="2.4" transform="rotate(18 47 26)"/>
+  <ellipse cx="32" cy="42" rx="5" ry="4" fill="#F5C3D2"/></svg>`;
+
+let chocBusy=false;
+ $("#btnChoco").addEventListener("click", ()=>{
+  if(chocBusy) return; chocBusy=true;
+  const btn=$("#btnChoco"); btn.disabled=true;
+  const layer=$("#floatLayer");
+  const N=20+((Math.random()*11)|0);           // 20–30 elements
+  let maxDur=0;
+  for(let i=0;i<N;i++){
+    const d=document.createElement("div");
+    d.className="float-item";
+    const s=rnd(34,70)|0, dur=rnd(3.2,5), del=rnd(0,1.5);
+    maxDur=Math.max(maxDur,dur+del);
+    d.style.cssText=`
+      --x:${rnd(2,94)}vw;
+      --dur:${dur.toFixed(2)}s;
+      animation-delay:${del.toFixed(2)}s;
+      --dx:${rnd(-60,60)|0}px;
+      --r0:${rnd(-180,180)|0}deg;
+      --r1:${(+d.style.getPropertyValue("--r0")+rnd(-220,220))|0}deg;`;
+    d.innerHTML=(i%2===0)?BAR(s):PAW(s);
+    d.addEventListener("animationend",()=>d.remove());
+    layer.appendChild(d);
+  }
+  pump(70);
+  toast(`Chocolate-fix administered. ${N} doses airborne — kitten saturation optimal.`,"fa-cookie-bite");
+  setTimeout(()=>{ chocBusy=false; btn.disabled=false; }, (maxDur+.4)*1000);
+});
+
+/* ================= COMMAND 3 · DISCHARGE PARTY MEDS ================= */
+ $("#btnParty").addEventListener("click", ()=>{
+  const r=$("#btnParty").getBoundingClientRect();
+  burst(r.left+r.width/2, r.top+r.height/2, 120, PARTY, 1.15);
+  setTimeout(()=>burst(innerWidth*.22, innerHeight*.78, 60, PARTY, 1.1), 140);
+  setTimeout(()=>burst(innerWidth*.78, innerHeight*.78, 60, PARTY, 1.1), 280);
+  pump(60);
+  toast("Celebration payload deployed. Prognosis: extremely festive.","fa-champagne-glasses");
+});
+})();
+</script>
+</body>
+</html>
