@@ -8,7 +8,6 @@ import CertificatesSection from '../../components/portfolio/CertificatesSection'
 export default function PortfolioPage() {
   const [activeFilter, setActiveFilter] = useState<string>('All');
   const [activeSection, setActiveSection] = useState<string>('projects-section');
-  const [activeTab, setActiveTab] = useState<'projects' | 'certs' | 'experience'>('projects');
 
   const categories = ['All', 'Flagship', 'AI', 'Cybersecurity', 'Systems/CLI'];
 
