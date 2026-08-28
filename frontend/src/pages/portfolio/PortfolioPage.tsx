@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, ExternalLink, Terminal, Award, Download } from 'lucide-react';
+import { Code2, ExternalLink, Terminal, Award, Download, Briefcase} from 'lucide-react';
 import { PROJECTS_DATA } from '../../data/projectsData';
 import { WORK_EXPERIENCE } from '../../data/workExperienceData';
 import CertificatesSection from '../../components/portfolio/CertificatesSection';
