@@ -31,7 +31,7 @@ export default function BlogPage() {
           The AETSH-69 Blog
         </h1>
         <p className="text-zinc-400 text-base sm:text-lg leading-relaxed">
-          Deep dives into systems architecture, AI tooling, DevOps, and building technology in Nairobi.
+          Engineering notes from a software developer in Nairobi — systems architecture, AI tooling, agri-tech, and honest lessons from building real products.
         </p>
       </div>
 

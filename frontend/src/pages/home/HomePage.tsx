@@ -9,15 +9,26 @@ import {
   Users, 
   Heart,
   MapPin,
-  Terminal
+  Terminal,
+  Briefcase,
+  GraduationCap,
+  CircleDot
 } from 'lucide-react';
 
+// Reordered: Portfolio → Services → AETSH-69 → Shop → Membership → Hobbies
 const sections = [
   { 
     icon: Code2, 
     title: 'Portfolio', 
     desc: 'Engineering projects and case studies', 
     path: '/portfolio', 
+    color: 'text-rust' 
+  },
+  { 
+    icon: Wifi, 
+    title: 'Services', 
+    desc: 'Engineering and IT consultancy', 
+    path: '/services', 
     color: 'text-rust' 
   },
   { 
@@ -35,10 +46,10 @@ const sections = [
     color: 'text-rust' 
   },
   { 
-    icon: Wifi, 
-    title: 'Services', 
-    desc: 'Engineering and IT consultancy', 
-    path: '/services', 
+    icon: Users, 
+    title: 'Membership', 
+    desc: 'Join the ecosystem — Builder tier', 
+    path: '/membership', 
     color: 'text-rust' 
   },
   { 
@@ -48,12 +59,29 @@ const sections = [
     path: '/hobbies', 
     color: 'text-rust' 
   },
-  { 
-    icon: Users, 
-    title: 'Membership', 
-    desc: 'Join the ecosystem — Builder tier', 
-    path: '/membership', 
-    color: 'text-rust' 
+];
+
+const timeline = [
+  {
+    icon: Briefcase,
+    period: 'Aug 2026 – Nov 2026',
+    title: 'Software Engineering Intern',
+    org: 'Spin Mobile LLC · Upperhill, Nairobi',
+    detail: 'Python · Django · PostgreSQL · Git/GitHub · PyCharm',
+  },
+  {
+    icon: Code2,
+    period: 'April 2025 – Present', // TODO: Replace with actual SmartShamba start date
+    title: 'Co-Founder & CTO',
+    org: 'SmartShamba · Nairobi',
+    detail: 'Next.js 16 · TypeScript · Prisma · Supabase · USSD · M-Pesa · 9+ Counties',
+  },
+  {
+    icon: GraduationCap,
+    period: 'May 2024 – Sep 2026',
+    title: 'Diploma in Computer Science (Level 6)',
+    org: 'The Nairobi National Polytechnic',
+    detail: 'CBET: Programming, Networking, Web Design, Databases, AI/ML, Information Systems',
   },
 ];
 
@@ -82,22 +110,37 @@ export default function HomePage() {
 
             {/* Subtitle / Tagline */}
             <p className="text-lg sm:text-xl text-zinc-300 max-w-2xl leading-relaxed font-medium">
-              Computer Science Diploma Student | Full-Stack Builder | AI & Cybersecurity Enthusiast
+              Software Engineering Intern @ Spin Mobile · Co-Founder & CTO @ SmartShamba · Systems Builder
             </p>
             <p className="text-sm text-zinc-500 font-mono">
-              Building practical systems from Nairobi, Kenya
+              Building production systems from Nairobi, Kenya
             </p>
+
+            {/* Status Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 text-sm text-green-400 font-mono">
+              <CircleDot className="w-3.5 h-3.5 text-green-400 animate-pulse" />
+              <span>Currently: Interning @ Spin Mobile</span>
+            </div>
 
             {/* Main About / Summary Paragraphs */}
             <div className="space-y-4 max-w-2xl text-zinc-400 text-base leading-relaxed">
               <p>
-                I am a final-year Diploma in Computer Science student at The Nairobi National Polytechnic with a strong foundation in core computing principles and a proven drive to build real systems. Through my coursework I have gained solid knowledge in Computer Organization & Architecture, Operating Systems, Networking & Distributed Systems, Database Management, Algorithms & Data Structures, Programming (Python & Java), Web Design, and Information Systems.
+                I'm Mark — a software engineer and Computer Science diploma student at The Nairobi National Polytechnic, graduating September 2026.
               </p>
               <p>
-                Beyond the classroom, I actively design and ship projects that apply these skills. My work includes full-stack web applications, AI-powered tools (including a machine learning malware detection scanner and a RAG-based platform), containerized multi-service systems, and practical CLI utilities. I have also completed professional certifications in Artificial Intelligence & Machine Learning (Foundation and Intermediate), Cybersecurity, Blockchain, Internet of Things, and Cisco Packet Tracer through the University of Nairobi’s KITI programme and Cisco Networking Academy.
+                I don't just study tech — I build it for real users. As Co-Founder & CTO of SmartShamba, I architected and shipped a production agri-tech platform now live across 9+ counties in Kenya, connecting feature-phone farmers (via Africa's Talking USSD *384*53374#) with institutional grain buyers (via web) on a unified Supabase PostgreSQL ledger — with M-Pesa payments, dispute resolution, group selling aggregation, GIS spatial queries, and an AI market intelligence engine backed by Gemini and NVIDIA models.
               </p>
               <p>
-                I am currently seeking industrial attachment or internship opportunities where I can contribute to real-world systems, learn enterprise best practices, and grow as a technologist. I am flexible, quick to learn new tools, and ready to add value in software development, AI/ML, cybersecurity, technical support, or related ICT roles.
+                Alongside that, I'm a Software Engineering Intern at Spin Mobile LLC, Upperhill Nairobi — writing Python, Django, and PostgreSQL under senior engineer mentorship, with weekly graded assessments and a capstone defense.
+              </p>
+              <p>
+                My personal builds include AETSH-69 (a full-stack RAG AI platform with sub-second pgvector semantic search, FastAPI, and the Claude API — the system powering this site's AI concierge), DEEP-TRIO (a Scikit-learn malware scanner with an automated quarantine pipeline), and a 22-project Python engineering suite.
+              </p>
+              <p>
+                I hold 8 professional certifications in AI/ML, Cybersecurity, Blockchain, IoT, and Cisco Networking. I also offer IT services in Nairobi covering networks, CCTV, computer maintenance, and hardware setup.
+              </p>
+              <p className="text-zinc-300 font-medium">
+                Open to software engineering, full-stack development, AI/ML, cybersecurity, and IT support roles.
               </p>
             </div>
 
@@ -162,7 +205,36 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6-SECTION NAVIGATION GRID (UNCHANGED) */}
+      {/* EXPERIENCE TIMELINE SECTION */}
+      <section className="space-y-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-[#D96B43]">
+          <Terminal className="w-3.5 h-3.5 text-[#D96B43]"/>
+          <span>EXPERIENCE // TIMELINE</span>
+        </div>
+        
+        <div className="space-y-4">
+          {timeline.map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <div key={idx} className="flex items-start gap-4 p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 hover:border-[#D96B43]/30 transition-all duration-200">
+                <div className="p-2.5 rounded-lg bg-zinc-800/50 flex-none">
+                  <Icon className="w-5 h-5 text-[#D96B43]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-mono text-zinc-500">{item.period}</span>
+                  </div>
+                  <h3 className="text-base font-serif font-semibold text-zinc-100">{item.title}</h3>
+                  <p className="text-sm text-zinc-400">{item.org}</p>
+                  <p className="text-xs font-mono text-zinc-500 mt-1">{item.detail}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 6-SECTION NAVIGATION GRID (Reordered) */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sections.map((section, idx) => {
           const Icon = section.icon;
