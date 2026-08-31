@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Code2, Briefcase, MessageCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Code2, Briefcase, MessageCircle , Download } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -82,6 +82,15 @@ export default function Footer() {
           </p>
         </div>
       </div>
+    
+        <div className="mt-6 pt-6 border-t border-zinc-800/60 text-center">
+          <a href="/assets_achieved/CV/Mark_Ndege_CV.pdf" target="_blank" rel="noreferrer" download className="inline-flex items-center gap-2.5 text-sm text-zinc-400 hover:text-[#D96B43] transition-colors group">
+            <span className="p-1.5 rounded-md bg-zinc-900 border border-zinc-800 group-hover:border-[#D96B43]/50 transition-colors">
+              <Download size={14} className="text-[#D96B43]" />
+            </span>
+            Download CV
+          </a>
+        </div>
     </footer>
   );
 }
