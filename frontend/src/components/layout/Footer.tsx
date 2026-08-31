@@ -82,20 +82,6 @@ export default function Footer() {
           </p>
         </div>
       </div>
-    
-        
-        <div className="max-w-2xl mx-auto mb-12 p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 text-center">
-          <h3 className="font-serif text-xl text-zinc-100 mb-2">Looking for my full Resume?</h3>
-          <p className="text-sm text-zinc-400 mb-5">View my complete CV in your browser or download it directly.</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="/assets_achieved/CV/Mark_Ndege_CV.pdf" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 hover:text-white hover:border-zinc-600 transition-colors text-sm font-medium">
-              <Eye size={16} /> View CV
-            </a>
-            <a href="/assets_achieved/CV/Mark_Ndege_CV.pdf" download className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#C25932] hover:bg-[#d96b43] text-white transition-colors text-sm font-medium shadow-md shadow-[#C25932]/20">
-              <Download size={16} /> Download CV
-            </a>
-          </div>
-        </div>
 
     </footer>
   );
