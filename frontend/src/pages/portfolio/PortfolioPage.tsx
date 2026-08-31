@@ -47,8 +47,7 @@ export default function PortfolioPage() {
     <div className="space-y-12 pb-20 pt-6 max-w-7xl mx-auto px-6">
       
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row items-start justify-between gap-6">
-        <div className="space-y-4 max-w-3xl">
+      <div className="space-y-4 max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-[#D96B43]">
             <Terminal className="w-3.5 h-3.5 text-[#D96B43]"/>
             <span>ENGINEERING // REPOSITORIES</span>
@@ -60,14 +59,6 @@ export default function PortfolioPage() {
             Full-stack web applications, AI RAG systems, machine learning scanners, and system-level tooling engineered by Mark Manoti Ndege from Nairobi, Kenya.
           </p>
         </div>
-        <a 
-          href="${import.meta.env.VITE_API_URL}/portfolio/pdf" 
-          target="_blank" 
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[#C25932] hover:bg-[#d96b43] text-white font-mono text-sm transition-colors shadow-md shadow-[#C25932]/20 whitespace-nowrap"
-        >
-          <Download className="w-4 h-4" /> Download CV
-        </a>
       </div>
 
       {/* Top Section Jump-Nav */}
