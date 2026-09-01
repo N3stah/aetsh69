@@ -37,22 +37,25 @@ export default function AiPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, loading, isThinking]);
 
-  // Phase 3: Weather & Time Logic
+  // Phase 3: Weather & Time Logic (Using free Open-Meteo API - No Key Required)
   useEffect(() => {
     const fetchWeather = (lat: number, lon: number) => {
-      const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
-      if (!apiKey) {
-        console.warn("VITE_OPENWEATHER_API_KEY is not set. Weather widget disabled.");
-        return;
-      }
-      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`)
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
         .then(res => res.json())
         .then(data => {
-          if (data.main && data.weather) {
+          if (data.current_weather) {
+            const conditionMap: Record<number, string> = {
+              0: 'Clear', 1: 'Mainly Clear', 2: 'Partly Cloudy', 3: 'Overcast',
+              45: 'Fog', 48: 'Fog', 51: 'Drizzle', 53: 'Drizzle', 55: 'Drizzle',
+              61: 'Rain', 63: 'Rain', 65: 'Rain', 71: 'Snow', 73: 'Snow', 75: 'Snow',
+              80: 'Rain Showers', 81: 'Rain Showers', 82: 'Rain Showers',
+              95: 'Thunderstorm', 96: 'Thunderstorm', 99: 'Thunderstorm'
+            };
+            const condition = conditionMap[data.current_weather.weathercode] || 'Unknown';
             setWeather({
-              city: data.name || 'Unknown',
-              temp: Math.round(data.main.temp),
-              condition: data.weather[0].main
+              city: (lat === -1.286389 && lon === 36.817223) ? 'Nairobi' : 'Your Location',
+              temp: Math.round(data.current_weather.temperature),
+              condition
             });
           }
         })
