@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, Cpu, Code2, ShieldCheck, Terminal, PlusCircle, History, Trash2, MessageSquare } from 'lucide-react';
+import { Send, Sparkles, Cpu, Code2, ShieldCheck, History, PlusCircle, Trash2, MessageSquare, Loader2 } from 'lucide-react';
 import { aetsh69Service } from '../services/aetsh69';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
@@ -16,6 +16,7 @@ const quickActions = [
 export default function AiPage() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -29,7 +30,7 @@ export default function AiPage() {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages, loading]);
+  }, [messages, loading, isThinking]);
 
   const sendMessage = async (text?: string) => {
     const msg = (text ?? input).trim();
@@ -43,9 +44,12 @@ export default function AiPage() {
     addMessageToSession(currentSessionId, { role: 'user', content: msg });
     setInput('');
     setLoading(true);
+    setIsThinking(true); // Start thinking
 
     // Add empty assistant message for streaming
     addMessageToSession(currentSessionId, { role: 'assistant', content: '' });
+
+    const startTime = Date.now();
 
     try {
       const response = await aetsh69Service.chat(msg, conversationId, 'general');
@@ -56,6 +60,7 @@ export default function AiPage() {
         
         const decoder = new TextDecoder();
         let assistantMessage = '';
+        let firstTokenReceived = false;
         
         while (true) {
           const { done, value } = await reader.read();
@@ -75,6 +80,10 @@ export default function AiPage() {
                   setBackendConversationId(currentSessionId, parsed.conversation_id);
                 }
                 if (parsed.content) {
+                  if (!firstTokenReceived) {
+                    setIsThinking(false); // Stop thinking on first byte
+                    firstTokenReceived = true;
+                  }
                   assistantMessage += parsed.content;
                   updateLastMessageInSession(currentSessionId, assistantMessage);
                 }
@@ -84,17 +93,22 @@ export default function AiPage() {
             }
           }
         }
+        
+        const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
+        updateLastMessageInSession(currentSessionId, assistantMessage, timeTaken);
+
       } else {
-        // Fallback for non-streaming (e.g., Gemini)
         const data = await response.json();
         setBackendConversationId(currentSessionId, data.conversation_id);
-        updateLastMessageInSession(currentSessionId, data.response);
+        const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
+        updateLastMessageInSession(currentSessionId, data.response, timeTaken);
       }
     } catch (err) {
       console.error('Chat error:', err);
       updateLastMessageInSession(currentSessionId, 'Pole sana — connection issue. Please try again.');
     } finally {
       setLoading(false);
+      setIsThinking(false);
     }
   };
 
@@ -169,9 +183,7 @@ export default function AiPage() {
           {/* Dynamic Empty State */}
           {isEmpty && !loading ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-              <div className="w-16 h-16 rounded-full bg-[#C25932]/20 border border-[#C25932]/40 flex items-center justify-center mb-8">
-                <Terminal className="w-8 h-8 text-[#D96B43]" />
-              </div>
+              <img src="/Aetshlogo.png" alt="AETSH-69 Logo" className="w-16 h-16 rounded-full object-cover ring-1 ring-white/10 mb-8" />
               <h1 className="text-3xl sm:text-4xl font-serif font-bold text-zinc-100 mb-4">
                 AETSH-69 <span className="text-[#D96B43]">Intelligence Hub</span>
               </h1>
@@ -205,9 +217,11 @@ export default function AiPage() {
                 {messages.map((msg: ChatMessage, i: number) => (
                   <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     {msg.role === 'assistant' && (
-                      <div className="w-8 h-8 rounded-full bg-[#C25932]/20 border border-[#C25932]/40 flex items-center justify-center flex-none mt-1">
-                        <Terminal className="w-4 h-4 text-[#D96B43]" />
-                      </div>
+                      <img 
+                        src="/Aetshlogo.png" 
+                        alt="AETSH-69" 
+                        className={`w-8 h-8 rounded-full object-cover ring-1 ring-white/10 flex-none mt-1 ${loading && msg.content === '' ? 'animate-pulse' : ''}`} 
+                      />
                     )}
                     
                     {msg.role === 'user' ? (
@@ -228,22 +242,24 @@ export default function AiPage() {
                         >
                           {msg.content}
                         </ReactMarkdown>
+                        
+                        {/* Latency Footer */}
+                        {msg.latency && !loading && (
+                          <div className="text-[10px] text-zinc-600 font-mono mt-2 flex items-center gap-1">
+                            <span>⚡</span> Processed in {msg.latency}s
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 ))}
                 
-                {loading && (
+                {/* Exposed "Thinking" UI */}
+                {isThinking && (
                   <div className="flex gap-3 justify-start">
-                    <div className="w-8 h-8 rounded-full bg-[#C25932]/20 border border-[#C25932]/40 flex items-center justify-center flex-none mt-1">
-                      <Terminal className="w-4 h-4 text-[#D96B43]" />
-                    </div>
-                    <div className="pt-3">
-                      <div className="flex gap-1.5 items-center">
-                        <div className="w-1.5 h-1.5 bg-[#D96B43] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="w-1.5 h-1.5 bg-[#D96B43] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="w-1.5 h-1.5 bg-[#D96B43] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                      </div>
+                    <img src="/Aetshlogo.png" alt="AETSH-69" className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 animate-pulse flex-none mt-1" />
+                    <div className="pt-3 text-zinc-500 text-sm flex items-center gap-2">
+                      <Loader2 size={14} className="animate-spin" /> Analyzing context...
                     </div>
                   </div>
                 )}

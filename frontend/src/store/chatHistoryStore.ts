@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
+  latency?: number; // in seconds
 }
 
 export interface ChatSession {
@@ -11,7 +12,7 @@ export interface ChatSession {
   title: string;
   createdAt: number;
   messages: ChatMessage[];
-  conversationId?: string; // Backend conversation ID
+  conversationId?: string;
 }
 
 interface ChatHistoryState {
@@ -19,7 +20,7 @@ interface ChatHistoryState {
   activeSessionId: string | null;
   createSession: () => string;
   addMessageToSession: (sessionId: string, message: ChatMessage) => void;
-  updateLastMessageInSession: (sessionId: string, content: string) => void;
+  updateLastMessageInSession: (sessionId: string, content: string, latency?: number) => void;
   setBackendConversationId: (sessionId: string, convId: string) => void;
   loadSession: (sessionId: string) => void;
   clearAllHistory: () => void;
@@ -42,7 +43,6 @@ export const useChatHistoryStore = create<ChatHistoryState>()(
         sessions: state.sessions.map(s => {
           if (s.id === sessionId) {
             const messages = [...s.messages, message];
-            // Auto-generate title from first user message
             if (s.title === 'New Chat' && message.role === 'user') {
               return { ...s, messages, title: message.content.substring(0, 30) + (message.content.length > 30 ? '...' : '') };
             }
@@ -51,12 +51,12 @@ export const useChatHistoryStore = create<ChatHistoryState>()(
           return s;
         })
       })),
-      updateLastMessageInSession: (sessionId, content) => set((state) => ({
+      updateLastMessageInSession: (sessionId, content, latency) => set((state) => ({
         sessions: state.sessions.map(s => {
           if (s.id === sessionId) {
             const messages = [...s.messages];
             if (messages.length > 0 && messages[messages.length - 1].role === 'assistant') {
-              messages[messages.length - 1] = { ...messages[messages.length - 1], content };
+              messages[messages.length - 1] = { ...messages[messages.length - 1], content, latency };
             }
             return { ...s, messages };
           }
