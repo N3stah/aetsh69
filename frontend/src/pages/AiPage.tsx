@@ -13,25 +13,6 @@ const quickActions = [
   { icon: ShieldCheck, text: "How does the DEEP-TRIO malware scanner work?" },
 ];
 
-// Weather Icons Mapping
-const weatherIcons: Record<string, string> = {
-  Clear: '☀️',
-  Clouds: '☁️',
-  Rain: '🌧️',
-  Drizzle: '🌦️',
-  Thunderstorm: '⛈️',
-  Snow: '❄️',
-  Mist: '🌫️',
-  Smoke: '🌫️',
-  Haze: '🌫️',
-  Dust: '🌫️',
-  Fog: '🌫️',
-  Sand: '🌫️',
-  Ash: '🌫️',
-  Squall: '💨',
-  Tornado: '🌪️'
-};
-
 export default function AiPage() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
