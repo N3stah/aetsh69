@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, Cpu, Code2, ShieldCheck, PlusCircle, Trash2, MessageSquare, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Send, Sparkles, Cpu, Code2, ShieldCheck, PlusCircle, Trash2, MessageSquare, Loader2, PanelLeftClose, PanelLeftOpen, MapPin, Cloud, Clock } from 'lucide-react';
 import { aetsh69Service } from '../services/aetsh69';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
@@ -13,12 +13,36 @@ const quickActions = [
   { icon: ShieldCheck, text: "How does the DEEP-TRIO malware scanner work?" },
 ];
 
+// Weather Icons Mapping
+const weatherIcons: Record<string, string> = {
+  Clear: '☀️',
+  Clouds: '☁️',
+  Rain: '🌧️',
+  Drizzle: '🌦️',
+  Thunderstorm: '⛈️',
+  Snow: '❄️',
+  Mist: '🌫️',
+  Smoke: '🌫️',
+  Haze: '🌫️',
+  Dust: '🌫️',
+  Fog: '🌫️',
+  Sand: '🌫️',
+  Ash: '🌫️',
+  Squall: '💨',
+  Tornado: '🌪️'
+};
+
 export default function AiPage() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Phase 1: Default closed
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
+  // Phase 3: Weather State
+  const [weather, setWeather] = useState<{ city: string; temp: number; condition: string } | null>(null);
+  const [time, setTime] = useState('');
+
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const { sessions, activeSessionId, createSession, addMessageToSession, updateLastMessageInSession, setBackendConversationId, loadSession, deleteSession, clearAllHistory } = useChatHistoryStore();
@@ -32,6 +56,51 @@ export default function AiPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, loading, isThinking]);
 
+  // Phase 3: Weather & Time Logic
+  useEffect(() => {
+    const fetchWeather = (lat: number, lon: number) => {
+      const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
+      if (!apiKey) {
+        console.warn("VITE_OPENWEATHER_API_KEY is not set. Weather widget disabled.");
+        return;
+      }
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.main && data.weather) {
+            setWeather({
+              city: data.name || 'Unknown',
+              temp: Math.round(data.main.temp),
+              condition: data.weather[0].main
+            });
+          }
+        })
+        .catch(console.error);
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+        // Fallback to Nairobi coordinates
+        () => fetchWeather(-1.286389, 36.817223)
+      );
+    } else {
+      fetchWeather(-1.286389, 36.817223);
+    }
+
+    // Time Logic
+    const updateTime = () => {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      setTime(`${hours}:${minutes}`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const sendMessage = async (text?: string) => {
     const msg = (text ?? input).trim();
     if (!msg || loading) return;
@@ -39,6 +108,7 @@ export default function AiPage() {
     let currentSessionId = activeSessionId;
     if (!currentSessionId) {
       currentSessionId = createSession();
+      setSidebarOpen(false); // Close sidebar on mobile when starting new chat
     }
     
     addMessageToSession(currentSessionId, { role: 'user', content: msg });
@@ -121,13 +191,19 @@ export default function AiPage() {
   const handleNewChat = () => {
     loadSession('');
     setInput('');
+    setSidebarOpen(false);
   };
 
   return (
     <div className="h-[calc(100vh-64px)] relative flex flex-row overflow-hidden bg-zinc-950">
       
+      {/* Phase 1: Mobile Backdrop */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+      
       {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'w-72' : 'w-0'} transition-all duration-300 border-r border-white/5 bg-zinc-950/80 backdrop-blur-md flex flex-col h-full overflow-hidden`}>
+      <aside className={`fixed lg:static top-0 left-0 h-full w-72 z-30 transition-transform duration-300 bg-zinc-950/80 backdrop-blur-md border-r border-white/5 flex flex-col overflow-hidden ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:hidden'}`}>
         <div className="p-4 border-b border-white/5 flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">History</h2>
@@ -147,7 +223,7 @@ export default function AiPage() {
               className={`group relative w-full text-left p-3 rounded-lg transition-colors ${activeSessionId === session.id ? 'bg-zinc-800/50 text-white' : 'text-zinc-400 hover:bg-zinc-800/30 hover:text-zinc-200'}`}
             >
               <button 
-                onClick={() => loadSession(session.id)}
+                onClick={() => { loadSession(session.id); setSidebarOpen(false); }}
                 className="w-full text-left pr-8"
               >
                 <div className="flex items-center gap-2">
@@ -186,25 +262,44 @@ export default function AiPage() {
         {/* Content Layer */}
         <div className="relative z-10 flex flex-col h-full">
           
-          {/* Top Bar */}
+          {/* Phase 2: Cleaned Top Bar */}
           <div className="flex items-center justify-between p-4 border-b border-white/5 bg-zinc-950/50 backdrop-blur-sm">
             {!sidebarOpen ? (
               <button onClick={() => setSidebarOpen(true)} className="text-zinc-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-zinc-800/50">
                 <PanelLeftOpen size={18} />
               </button>
             ) : (
-              <div className="w-10"></div>
+              <div className="w-9"></div>
             )}
-            <div className="w-10"></div>
+            
+            {/* Phase 3: Weather Intelligence Badge */}
+            {weather && (
+              <div className="hidden sm:flex items-center gap-4 px-4 py-1.5 bg-zinc-900/60 border border-white/10 rounded-full text-xs font-mono text-zinc-300">
+                <span className="flex items-center gap-1.5"><MapPin size={12} className="text-[#D96B43]" /> {weather.city}, KE</span>
+                <span className="flex items-center gap-1.5"><Cloud size={12} className="text-[#D96B43]" /> {weather.temp}°C {weather.condition}</span>
+                <span className="flex items-center gap-1.5"><Clock size={12} className="text-[#D96B43]" /> {time} EAT</span>
+              </div>
+            )}
+            <div className="w-9"></div>
           </div>
 
           {/* Dynamic Empty State */}
           {isEmpty && !loading ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+            <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-8">
               <img src="/Aetshlogo.png" alt="AETSH-69 Logo" className="w-16 h-16 rounded-full object-cover ring-1 ring-white/10 mb-8" />
               <h1 className="text-3xl sm:text-4xl font-serif font-bold text-zinc-100 mb-4">
                 AETSH-69 <span className="text-[#D96B43]">Intelligence Hub</span>
               </h1>
+              
+              {/* Mobile Weather Badge */}
+              {weather && (
+                <div className="sm:hidden flex items-center gap-4 px-4 py-1.5 bg-zinc-900/60 border border-white/10 rounded-full text-xs font-mono text-zinc-300 mb-6">
+                  <span className="flex items-center gap-1.5"><MapPin size={12} className="text-[#D96B43]" /> {weather.city}</span>
+                  <span className="flex items-center gap-1.5"><Cloud size={12} className="text-[#D96B43]" /> {weather.temp}°C</span>
+                  <span className="flex items-center gap-1.5"><Clock size={12} className="text-[#D96B43]" /> {time}</span>
+                </div>
+              )}
+
               <p className="text-zinc-400 max-w-md mb-10">
                 An interactive command center powered by RAG architecture. Ask me about Mark's engineering projects, IT services, or technical stack.
               </p>
