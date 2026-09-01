@@ -79,7 +79,6 @@ export default function AiPage() {
           }
         }
       } else {
-        // Fallback for non-streaming (e.g., Gemini)
         const data = await response.json();
         setConversationId(data.conversation_id);
         setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
@@ -115,13 +114,13 @@ export default function AiPage() {
         {/* Dynamic Empty State */}
         {isEmpty && !loading ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-            <div className="w-16 h-16 rounded-full bg-[#C25932]/20 border border-[#C25932]/40 flex items-center justify-center mb-6">
+            <div className="w-16 h-16 rounded-full bg-[#C25932]/20 border border-[#C25932]/40 flex items-center justify-center mb-8">
               <Terminal className="w-8 h-8 text-[#D96B43]" />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-serif font-bold text-zinc-100 mb-3">
+            <h1 className="text-3xl sm:text-4xl font-serif font-bold text-zinc-100 mb-4">
               AETSH-69 <span className="text-[#D96B43]">Intelligence Hub</span>
             </h1>
-            <p className="text-zinc-400 max-w-md mb-8">
+            <p className="text-zinc-400 max-w-md mb-10">
               An interactive command center powered by RAG architecture. Ask me about Mark's engineering projects, IT services, or technical stack.
             </p>
             
@@ -133,12 +132,12 @@ export default function AiPage() {
                   <button 
                     key={idx} 
                     onClick={() => sendMessage(action.text)}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-zinc-900/60 border border-white/10 hover:border-[#D96B43]/50 hover:bg-zinc-900/80 transition-all duration-200 text-left group"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-zinc-900/60 border border-white/10 hover:bg-white/5 hover:border-[#D96B43]/50 transition-all duration-300 text-left group"
                   >
                     <div className="p-2 rounded-lg bg-zinc-800/50 group-hover:bg-[#D96B43]/10 transition-colors flex-none">
                       <Icon className="w-4 h-4 text-[#D96B43]" />
                     </div>
-                    <span className="text-sm font-mono text-zinc-300 group-hover:text-white">{action.text}</span>
+                    <span className="font-sans text-sm text-zinc-300 group-hover:text-white">{action.text}</span>
                   </button>
                 );
               })}
@@ -198,21 +197,21 @@ export default function AiPage() {
         )}
 
         {/* Floating Input Bar */}
-        <div className="sticky bottom-0 p-4 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent">
+        <div className="sticky bottom-0 p-4 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent mb-8">
           <div className="max-w-3xl mx-auto w-full">
-            <div className="flex items-center gap-2 bg-zinc-900/60 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl shadow-black/50 p-2 focus-within:border-[#D96B43]/50 transition-colors">
+            <div className="flex items-center gap-2 bg-zinc-900/60 backdrop-blur-md border border-white/10 rounded-full shadow-2xl shadow-black/50 p-2 focus-within:border-[#D96B43]/50 transition-colors">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Message AETSH-69..."
                 rows={1}
-                className="flex-1 bg-transparent border-0 focus:ring-0 text-zinc-100 placeholder:text-zinc-500 text-sm resize-none px-3 py-2.5 outline-none"
+                className="flex-1 bg-transparent border-0 focus:ring-0 text-zinc-100 placeholder:text-zinc-400 text-sm resize-none px-4 py-3 outline-none"
               />
               <button
                 onClick={() => sendMessage()}
                 disabled={loading || !input.trim()}
-                className="p-3 rounded-xl bg-[#C25932] hover:bg-[#d96b43] text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-3 rounded-full bg-[#D96B43] hover:bg-[#d96b43] text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Send size={18} />
               </button>
