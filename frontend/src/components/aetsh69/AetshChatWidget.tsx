@@ -1,11 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Mic, Volume2, VolumeX, Square } from 'lucide-react';
-import { aetsh69Service, type ChatMessage } from '../../services/aetsh69';
+import { Link } from 'react-router-dom';
+import { MessageCircle, X, Send, Mic, Volume2, VolumeX, Square, Maximize2, Sparkles } from 'lucide-react';
+import { aetsh69Service } from '../../services/aetsh69';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
-import { useNavigate } from 'react-router-dom';
-import { useCartStore } from '../../store/cartStore';
-import { ShoppingCart, ArrowRight } from 'lucide-react';
+import { useChatHistoryStore } from '../../store/chatHistoryStore';
 
 // Web Speech API TypeScript declarations
 interface SpeechRecognitionEvent extends Event {
@@ -58,67 +57,21 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-interface ParsedAction {
-  text: string;
-  actionType: 'add_to_cart' | 'navigate' | null;
-  payload: string;
-}
-
-const parseAction = (text: string): ParsedAction => {
-  const regex = /\[ACTION:(add_to_cart|navigate):([a-zA-Z0-9\-_\/:]+)\]/;
-  const match = text.match(regex);
-  if (match) {
-    return {
-      text: text.replace(regex, '').trim(),
-      actionType: match[1] as 'add_to_cart' | 'navigate',
-      payload: match[2]
-    };
-  }
-  return { text, actionType: null, payload: '' };
-};
-
-const ActionButton = ({ type, payload }: { type: 'add_to_cart' | 'navigate', payload: string }) => {
-  const addItem = useCartStore((state) => state.addItem);
-  const openCart = useCartStore((state) => state.openCart);
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    if (type === 'add_to_cart') {
-      addItem({ id: payload, slug: payload, name: payload, price: 0, currency: 'KES' });
-      openCart();
-    } else if (type === 'navigate') {
-      navigate(payload);
-    }
-  };
-
-  return (
-    <button 
-      onClick={handleClick}
-      className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#C25932] hover:bg-[#d96b43] text-white font-mono text-xs transition-all shadow-md shadow-[#C25932]/30 hover:scale-105"
-    >
-      {type === 'add_to_cart' ? <ShoppingCart className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
-      <span>{type === 'add_to_cart' ? 'Add to Cart' : 'View Page'}</span>
-    </button>
-  );
-};
-
 export default function AetshChatWidget() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([{
-    role: 'assistant',
-    content: window.location.pathname.toLowerCase().includes('/judy') 
-      ? "Hey Judy, welcome to your page! Cheers to being 21! 🥂" 
-      : "Habari! Mimi ni AETSH-69 — Mark's AI concierge. Ask me about Mark's projects, services, shop, or anything on this site. You can also use the 🎤 mic to talk to me!",
-  }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | undefined>();
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [interimText, setInterimText] = useState('');
   const [voiceOutputEnabled, setVoiceOutputEnabled] = useState(false);
   const [voiceMode, setVoiceMode] = useState(false);
   
+  // Tooltip State
+  const [tooltip1, setTooltip1] = useState(false);
+  const [tooltip2, setTooltip2] = useState(false);
+  const [tooltipDismissed, setTooltipDismissed] = useState(false);
+
   const voiceModeRef = useRef(false);
   const voiceOutputRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -128,12 +81,34 @@ export default function AetshChatWidget() {
   const shouldRestartRef = useRef(false);
   const isSendingRef = useRef(false);
 
+  const { sessions, activeSessionId, createSession, addMessageToSession, updateLastMessageInSession, setBackendConversationId, loadSession } = useChatHistoryStore();
+  
+  const activeSession = sessions.find(s => s.id === activeSessionId);
+  const messages = activeSession?.messages || [];
+  const conversationId = activeSession?.conversationId;
+
   useEffect(() => { voiceModeRef.current = voiceMode; }, [voiceMode]);
   useEffect(() => { voiceOutputRef.current = voiceOutputEnabled; }, [voiceOutputEnabled]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages, open, interimText]);
+  }, [messages, open, interimText, loading]);
+
+  // Tooltip Timers
+  useEffect(() => {
+    if (!open && !tooltipDismissed) {
+      const t1 = setTimeout(() => setTooltip1(true), 3000);
+      const t2 = setTimeout(() => { setTooltip1(false); setTooltip2(true); }, 15000);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+  }, [open, tooltipDismissed]);
+
+  useEffect(() => {
+    if (open) {
+      setTooltip1(false);
+      setTooltip2(false);
+    }
+  }, [open]);
 
   const stopSpeaking = () => {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -188,12 +163,20 @@ export default function AetshChatWidget() {
     const msg = (text ?? input).trim();
     if (!msg || loading) return;
 
-    setMessages(prev => [...prev, { role: 'user', content: msg }]);
+    let currentSessionId = activeSessionId;
+    if (!currentSessionId) {
+      currentSessionId = createSession();
+    }
+    
+    addMessageToSession(currentSessionId, { role: 'user', content: msg });
     setInput('');
     setInterimText('');
     finalTranscriptRef.current = '';
     setLoading(true);
     stopSpeaking();
+    addMessageToSession(currentSessionId, { role: 'assistant', content: '' });
+
+    const startTime = Date.now();
 
     try {
       const response = await aetsh69Service.chat(msg, conversationId, 'general');
@@ -204,8 +187,6 @@ export default function AetshChatWidget() {
         
         const decoder = new TextDecoder();
         let assistantMessage = '';
-        
-        setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
         
         while (true) {
           const { done, value } = await reader.read();
@@ -222,18 +203,11 @@ export default function AetshChatWidget() {
               try {
                 const parsed = JSON.parse(dataStr);
                 if (parsed.conversation_id) {
-                  setConversationId(parsed.conversation_id);
+                  setBackendConversationId(currentSessionId, parsed.conversation_id);
                 }
                 if (parsed.content) {
                   assistantMessage += parsed.content;
-                  setMessages(prev => {
-                    const newMessages = [...prev];
-                    newMessages[newMessages.length - 1] = { 
-                      role: 'assistant', 
-                      content: assistantMessage 
-                    };
-                    return newMessages;
-                  });
+                  updateLastMessageInSession(currentSessionId, assistantMessage);
                 }
               } catch (e) {
                 console.error('Parse error:', e);
@@ -241,6 +215,9 @@ export default function AetshChatWidget() {
             }
           }
         }
+        
+        const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
+        updateLastMessageInSession(currentSessionId, assistantMessage, timeTaken);
 
         if (fromVoice && (voiceOutputRef.current || voiceModeRef.current)) {
           speakText(assistantMessage, () => {
@@ -251,8 +228,9 @@ export default function AetshChatWidget() {
         }
       } else {
         const data = await response.json();
-        setConversationId(data.conversation_id);
-        setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+        setBackendConversationId(currentSessionId, data.conversation_id);
+        const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
+        updateLastMessageInSession(currentSessionId, data.response, timeTaken);
 
         if (fromVoice && (voiceOutputRef.current || voiceModeRef.current)) {
           speakText(data.response, () => {
@@ -264,7 +242,7 @@ export default function AetshChatWidget() {
       }
     } catch (err) {
       console.error('Chat error:', err);
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Pole sana — connection issue. Please try again.' }]);
+      updateLastMessageInSession(currentSessionId, 'Pole sana — connection issue. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -387,13 +365,29 @@ export default function AetshChatWidget() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#C25932] text-white shadow-2xl shadow-black/50 flex items-center justify-center transition-transform duration-300 hover:scale-110 active:scale-95"
-        aria-label="Open AETSH-69 chat"
-      >
-        {open ? <X size={24} /> : <MessageCircle size={24} />}
-      </button>
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        {/* Timed Tooltips */}
+        {!open && tooltip1 && !tooltipDismissed && (
+          <div className="mb-4 relative w-56 p-3 bg-zinc-900 text-white text-sm rounded-xl shadow-2xl border border-zinc-700 animate-fade-in">
+            <button onClick={() => setTooltipDismissed(true)} className="absolute top-1 right-1 text-zinc-500 hover:text-white p-1"><X size={12} /></button>
+            Welcome to Mark's personal ecosystem! 👋
+          </div>
+        )}
+        {!open && tooltip2 && !tooltipDismissed && (
+          <div className="mb-4 relative w-64 p-3 bg-zinc-900 text-white text-sm rounded-xl shadow-2xl border border-zinc-700 animate-fade-in">
+            <button onClick={() => setTooltipDismissed(true)} className="absolute top-1 right-1 text-zinc-500 hover:text-white p-1"><X size={12} /></button>
+            Need help navigating projects or checking service pricing? Ask me anything!
+          </div>
+        )}
+
+        <button
+          onClick={() => setOpen(!open)}
+          className="w-14 h-14 rounded-full bg-[#C25932] text-white shadow-2xl shadow-black/50 flex items-center justify-center transition-transform duration-300 hover:scale-110 active:scale-95"
+          aria-label="Open AETSH-69 chat"
+        >
+          {open ? <X size={24} /> : <MessageCircle size={24} />}
+        </button>
+      </div>
 
       {open && (
         <div className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-8rem)] rounded-[2rem] overflow-hidden shadow-2xl shadow-black/80 flex flex-col border border-white/10">
@@ -403,9 +397,7 @@ export default function AetshChatWidget() {
             className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-110"
             style={{ backgroundImage: "url('/AETSH-69_wallpaper/Aetsh69_chat_wallpaper.jpeg')" }}
           />
-          
-          {/* Dimming & Vignette Overlay */}
-          <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm bg-[radial-gradient(circle_at_center,rgba(24,24,27,0.4)_0%,rgba(9,9,11,0.8)_100%)]"></div>
+          <div className="absolute inset-0 bg-zinc-950/85 backdrop-blur-md bg-[radial-gradient(circle_at_center,rgba(24,24,27,0.7)_0%,rgba(9,9,11,0.95)_100%)]"></div>
 
           {/* Content Layer */}
           <div className="relative z-10 flex flex-col h-full">
@@ -413,10 +405,7 @@ export default function AetshChatWidget() {
             {/* Glass Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/5 bg-zinc-900/40 backdrop-blur-xl">
               <div className="flex items-center gap-3">
-                <div className="relative w-8 h-8 rounded-full bg-[#D96B43]/20 border border-[#D96B43]/40 flex items-center justify-center">
-                  <span className="text-xs font-bold text-[#D96B43]">69</span>
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-zinc-900"></span>
-                </div>
+                <img src="/Aetshlogo.png" alt="AETSH-69" className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10" />
                 <div>
                   <p className="text-sm font-semibold text-zinc-100">AETSH-69</p>
                   <p className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">
@@ -425,6 +414,9 @@ export default function AetshChatWidget() {
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                <Link to="/ai" onClick={() => setOpen(false)} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors" title="Open Full Screen">
+                  <Maximize2 size={16} />
+                </Link>
                 {SpeechRecognitionClass && (
                   <button
                     onClick={toggleVoiceMode}
@@ -455,40 +447,39 @@ export default function AetshChatWidget() {
 
             {/* Messages Area */}
             <div ref={scrollRef} className="chat-scroll flex-1 overflow-y-auto px-4 py-6 space-y-4">
-              {messages.map((msg, i) => {
-                const parsed = msg.role === 'assistant' ? parseAction(msg.content) : null;
-                return (
-                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div 
-                      className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                        msg.role === 'user' 
-                          ? 'bg-[#C25932]/90 backdrop-blur-md text-white rounded-br-sm shadow-lg shadow-[#C25932]/20' 
-                          : 'bg-zinc-900/60 backdrop-blur-md border border-white/10 text-zinc-100 rounded-bl-sm shadow-lg shadow-black/20'
-                      }`}
-                    >
-                      {msg.role === 'assistant' && parsed ? (
-                        <>
-                          <ReactMarkdown
-                    rehypePlugins={[[rehypeSanitize]]}
-                            components={{
-                              p: ({node, ...props}) => <p {...props} className="mb-2 last:mb-0" />,
-                              ul: ({node, ...props}) => <ul {...props} className="list-disc pl-4 space-y-1 mb-2" />,
-                              ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-4 space-y-1 mb-2" />,
-                              a: ({node, ...props}) => <a {...props} target="_blank" rel="noreferrer" className="text-[#D96B43] underline" />,
-                              code: ({node, ...props}) => <code {...props} className="bg-black/40 text-[#D96B43] px-1 rounded" />
-                            }}
-                          >
-                            {parsed.text}
-                          </ReactMarkdown>
-                          {parsed.actionType && <ActionButton type={parsed.actionType} payload={parsed.payload} />}
-                        </>
-                      ) : (
-                        <span className="whitespace-pre-wrap">{msg.content}</span>
-                      )}
-                    </div>
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div 
+                    className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                      msg.role === 'user' 
+                        ? 'bg-[#C25932]/90 backdrop-blur-md text-white rounded-br-sm shadow-lg shadow-[#C25932]/20' 
+                        : 'bg-zinc-900/60 backdrop-blur-md border border-white/10 text-zinc-100 rounded-bl-sm shadow-lg shadow-black/20'
+                    }`}
+                  >
+                    {msg.role === 'assistant' ? (
+                      <ReactMarkdown
+                        rehypePlugins={[[rehypeSanitize]]}
+                        components={{
+                          p: ({node, ...props}) => <p {...props} className="mb-2 last:mb-0" />,
+                          ul: ({node, ...props}) => <ul {...props} className="list-disc pl-4 space-y-1 mb-2" />,
+                          ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-4 space-y-1 mb-2" />,
+                          a: ({node, ...props}) => <a {...props} target="_blank" rel="noreferrer" className="text-[#D96B43] underline" />,
+                          code: ({node, ...props}) => <code {...props} className="bg-black/40 text-[#D96B43] px-1 rounded" />
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    ) : (
+                      <span className="whitespace-pre-wrap">{msg.content}</span>
+                    )}
+                    {msg.latency && !loading && msg.role === 'assistant' && (
+                      <div className="text-[10px] text-zinc-600 font-mono mt-2 flex items-center gap-1">
+                        <span>⚡</span> Processed in {msg.latency}s
+                      </div>
+                    )}
                   </div>
-                );
-              })}
+                </div>
+              ))}
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-zinc-900/60 backdrop-blur-md border border-white/10 rounded-2xl rounded-bl-sm px-4 py-3 shadow-lg shadow-black/20">

@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
-  latency?: number; // in seconds
+  latency?: number;
 }
 
 export interface ChatSession {
@@ -23,6 +23,7 @@ interface ChatHistoryState {
   updateLastMessageInSession: (sessionId: string, content: string, latency?: number) => void;
   setBackendConversationId: (sessionId: string, convId: string) => void;
   loadSession: (sessionId: string) => void;
+  deleteSession: (sessionId: string) => void;
   clearAllHistory: () => void;
 }
 
@@ -67,6 +68,10 @@ export const useChatHistoryStore = create<ChatHistoryState>()(
         sessions: state.sessions.map(s => s.id === sessionId ? { ...s, conversationId: convId } : s)
       })),
       loadSession: (sessionId) => set({ activeSessionId: sessionId }),
+      deleteSession: (sessionId) => set((state) => ({
+        sessions: state.sessions.filter(s => s.id !== sessionId),
+        activeSessionId: state.activeSessionId === sessionId ? null : state.activeSessionId
+      })),
       clearAllHistory: () => set({ sessions: [], activeSessionId: null })
     }),
     { name: 'aetsh69-chat-history' }

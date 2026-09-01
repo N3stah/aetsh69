@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, Cpu, Code2, ShieldCheck, History, PlusCircle, Trash2, MessageSquare, Loader2 } from 'lucide-react';
+import { Send, Sparkles, Cpu, Code2, ShieldCheck, PlusCircle, Trash2, MessageSquare, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { aetsh69Service } from '../services/aetsh69';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
@@ -21,7 +21,7 @@ export default function AiPage() {
   
   const scrollRef = useRef<HTMLDivElement>(null);
   
-  const { sessions, activeSessionId, createSession, addMessageToSession, updateLastMessageInSession, setBackendConversationId, loadSession, clearAllHistory } = useChatHistoryStore();
+  const { sessions, activeSessionId, createSession, addMessageToSession, updateLastMessageInSession, setBackendConversationId, loadSession, deleteSession, clearAllHistory } = useChatHistoryStore();
   
   const activeSession = sessions.find(s => s.id === activeSessionId);
   const messages = activeSession?.messages || [];
@@ -44,9 +44,8 @@ export default function AiPage() {
     addMessageToSession(currentSessionId, { role: 'user', content: msg });
     setInput('');
     setLoading(true);
-    setIsThinking(true); // Start thinking
+    setIsThinking(true);
 
-    // Add empty assistant message for streaming
     addMessageToSession(currentSessionId, { role: 'assistant', content: '' });
 
     const startTime = Date.now();
@@ -81,7 +80,7 @@ export default function AiPage() {
                 }
                 if (parsed.content) {
                   if (!firstTokenReceived) {
-                    setIsThinking(false); // Stop thinking on first byte
+                    setIsThinking(false);
                     firstTokenReceived = true;
                   }
                   assistantMessage += parsed.content;
@@ -129,7 +128,13 @@ export default function AiPage() {
       
       {/* Sidebar */}
       <aside className={`${sidebarOpen ? 'w-72' : 'w-0'} transition-all duration-300 border-r border-white/5 bg-zinc-950/80 backdrop-blur-md flex flex-col h-full overflow-hidden`}>
-        <div className="p-4 border-b border-white/5">
+        <div className="p-4 border-b border-white/5 flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">History</h2>
+            <button onClick={() => setSidebarOpen(false)} className="text-zinc-500 hover:text-white">
+              <PanelLeftClose size={16} />
+            </button>
+          </div>
           <button onClick={handleNewChat} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#C25932] hover:bg-[#d96b43] text-white text-sm font-medium transition-colors">
             <PlusCircle size={16} /> New Chat
           </button>
@@ -137,17 +142,27 @@ export default function AiPage() {
         
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {sessions.slice().reverse().map(session => (
-            <button 
+            <div 
               key={session.id} 
-              onClick={() => loadSession(session.id)}
-              className={`w-full text-left p-3 rounded-lg transition-colors ${activeSessionId === session.id ? 'bg-zinc-800/50 text-white' : 'text-zinc-400 hover:bg-zinc-800/30 hover:text-zinc-200'}`}
+              className={`group relative w-full text-left p-3 rounded-lg transition-colors ${activeSessionId === session.id ? 'bg-zinc-800/50 text-white' : 'text-zinc-400 hover:bg-zinc-800/30 hover:text-zinc-200'}`}
             >
-              <div className="flex items-center gap-2">
-                <MessageSquare size={14} className="flex-none opacity-70" />
-                <p className="text-sm font-medium truncate">{session.title}</p>
-              </div>
-              <p className="text-xs text-zinc-500 mt-1 ml-6">{new Date(session.createdAt).toLocaleDateString()}</p>
-            </button>
+              <button 
+                onClick={() => loadSession(session.id)}
+                className="w-full text-left pr-8"
+              >
+                <div className="flex items-center gap-2">
+                  <MessageSquare size={14} className="flex-none opacity-70" />
+                  <p className="text-sm font-medium truncate">{session.title}</p>
+                </div>
+                <p className="text-xs text-zinc-500 mt-1 ml-6">{new Date(session.createdAt).toLocaleDateString()}</p>
+              </button>
+              <button 
+                onClick={() => deleteSession(session.id)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-zinc-500 hover:text-red-400 hover:bg-zinc-700/50 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
           ))}
         </div>
 
@@ -173,10 +188,13 @@ export default function AiPage() {
           
           {/* Top Bar */}
           <div className="flex items-center justify-between p-4 border-b border-white/5 bg-zinc-950/50 backdrop-blur-sm">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-zinc-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-zinc-800/50">
-              <History size={18} />
-            </button>
-            <h1 className="text-sm font-mono text-zinc-400 tracking-wider hidden sm:block">AETSH-69 INTELLIGENCE HUB</h1>
+            {!sidebarOpen ? (
+              <button onClick={() => setSidebarOpen(true)} className="text-zinc-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-zinc-800/50">
+                <PanelLeftOpen size={18} />
+              </button>
+            ) : (
+              <div className="w-10"></div>
+            )}
             <div className="w-10"></div>
           </div>
 
@@ -243,7 +261,6 @@ export default function AiPage() {
                           {msg.content}
                         </ReactMarkdown>
                         
-                        {/* Latency Footer */}
                         {msg.latency && !loading && (
                           <div className="text-[10px] text-zinc-600 font-mono mt-2 flex items-center gap-1">
                             <span>⚡</span> Processed in {msg.latency}s
