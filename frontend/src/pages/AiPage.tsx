@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Sparkles, Cpu, Code2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Send, Sparkles, Cpu, Code2, ShieldCheck } from 'lucide-react';
 import { aetsh69Service, type ChatMessage } from '../services/aetsh69';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
