@@ -35,7 +35,7 @@ const sections = [
     icon: Brain, 
     title: 'AETSH-69 AI', 
     desc: 'My AI concierge — ask me anything', 
-    path: null, 
+    path: '/ai', 
     color: 'text-rust' 
   },
   { 
