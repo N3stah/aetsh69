@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, X, Send, Mic, Volume2, VolumeX, Square, Maximize2, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, Mic, Volume2, VolumeX, Square, Maximize2 } from 'lucide-react';
 import { aetsh69Service } from '../../services/aetsh69';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
@@ -81,7 +81,7 @@ export default function AetshChatWidget() {
   const shouldRestartRef = useRef(false);
   const isSendingRef = useRef(false);
 
-  const { sessions, activeSessionId, createSession, addMessageToSession, updateLastMessageInSession, setBackendConversationId, loadSession } = useChatHistoryStore();
+  const { sessions, activeSessionId, createSession, addMessageToSession, updateLastMessageInSession, setBackendConversationId } = useChatHistoryStore();
   
   const activeSession = sessions.find(s => s.id === activeSessionId);
   const messages = activeSession?.messages || [];
