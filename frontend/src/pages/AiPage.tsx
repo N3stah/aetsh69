@@ -3,7 +3,8 @@ import { Send, Sparkles, Cpu, Code2, ShieldCheck, Terminal, PlusCircle, History,
 import { aetsh69Service } from '../services/aetsh69';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
-import { useChatHistoryStore, ChatMessage } from '../store/chatHistoryStore';
+import { useChatHistoryStore } from '../store/chatHistoryStore';
+import type { ChatMessage } from '../store/chatHistoryStore';
 
 const quickActions = [
   { icon: Cpu, text: "Summarize Mark's technical skills" },
