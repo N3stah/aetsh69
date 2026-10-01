@@ -30,7 +30,7 @@ pgvector==0.4.2
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 bcrypt==5.0.0
-PyJWT==2.13.0
+PyJWT==2.15.0
 
 # ==========================================
 # Email Verification & Password Reset
